@@ -1,0 +1,19 @@
+{
+  "name": "route-optimization-scm-backend",
+  "version": "1.0.0",
+  "description": "Route Optimizer Application for South Vietnam Rice Husk Market",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Thupha41/Route-Optimization-SCM-Backend.git"
+  },
+  "author": "\"Thupha Tornado\"",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Thupha41/Route-Optimization-SCM-Backend/issues"
+  },
+  "homepage": "https://github.com/Thupha41/Route-Optimization-SCM-Backend#readme"
+}
