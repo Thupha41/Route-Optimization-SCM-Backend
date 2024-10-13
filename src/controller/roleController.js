@@ -1,45 +1,32 @@
 import RoleService from "../services/role.service";
-
-const ReadFunc = async (req, res) => {
+import { OK, CREATED, NO_CONTENT } from "../core/success.response";
+import { ErrorResponse } from "../core/error.response";
+const getListRoles = async (req, res) => {
   try {
     let roles = await RoleService.getRoles();
-    if (roles && +roles.EC === 1) {
-      res.status(200).json({
-        EM: roles.EM, // error or success message
-        EC: roles.EC, // Error code
-        DT: roles.DT, // data
-      });
-    } else if (roles && roles.EC === 0) {
-      // Not found response
-      return res.status(404).json({
-        EM: roles.EM, // "No roles found"
-        EC: roles.EC, // Error code
-        DT: roles.DT, // empty array
-      });
-    } else {
-      return res.status(500).json({
-        EM: roles.EM, // error or success message
-        EC: roles.EC, // Error code
-        DT: roles.DT, // data
-      });
-    }
+    return new OK({
+      EC: roles.EC,
+      EM: roles.EM,
+      DT: roles.DT,
+    }).send(res);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      EM: "Error message from server", // error message
-      EC: "-1", // Error code
-      DT: "", // data
-    });
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Error message from server",
+    }).send(res);
   }
 };
 
-const createUser = async () => {
+const createRoles = async () => {
   try {
   } catch (error) {
     console.log(error);
   }
 };
-const deleteUser = async (req, res) => {
+const deleteRoles = async (req, res) => {
   try {
     console.log(">>> check id", req.params.id);
     let data = await UserService.delete(req.params.id);
@@ -57,7 +44,7 @@ const deleteUser = async (req, res) => {
     });
   }
 };
-const updateUser = async () => {
+const updateRoles = async () => {
   try {
   } catch (error) {
     console.log(error);
@@ -65,8 +52,8 @@ const updateUser = async () => {
 };
 
 module.exports = {
-  ReadFunc,
-  createUser,
-  deleteUser,
-  updateUser,
+  getListRoles,
+  createRoles,
+  deleteRoles,
+  updateRoles,
 };

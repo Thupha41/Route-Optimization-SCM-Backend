@@ -1,4 +1,6 @@
 import AuthService from "../services/auth.service";
+import { OK, CREATED, NO_CONTENT } from "../core/success.response";
+import { ErrorResponse } from "../core/error.response";
 const testApi = (req, res) => {
   res.status(200).json({
     message: "ok",
@@ -45,29 +47,38 @@ const handleRegister = async (req, res) => {
 const handleLogin = async (req, res) => {
   try {
     let data = await AuthService.login(req.body);
+
     if (data && data.DT && data.DT.accessToken) {
       res.cookie("jwt", data.DT.accessToken, { httpOnly: true });
     }
 
-    if (data && +data.EC !== 1) {
-      return res.status(401).json({
-        EM: data.EM,
-        EC: data.EC,
-        DT: data.DT,
-      });
-    }
-    return res.status(200).json({
+    return new OK({
       EM: data.EM,
-      EC: data.EC,
       DT: data.DT,
-    });
+    }).send(res);
+  } catch (error) {
+    console.error("Error in handleLogin:", error);
+
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Error message from server",
+    }).send(res);
+  }
+};
+
+const handleLogout = (req, res) => {
+  try {
+    res.clearCookie("jwt");
+    return new OK({
+      EM: "Clear cookies successfully",
+    }).send(res);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({
-      EM: "Error message from server", // error message
-      EC: "-1", // Error code
-      DT: "", // data
-    });
+    return new ErrorResponse({
+      EM: "Error message from server",
+    }).send(res);
   }
 };
 
@@ -75,4 +86,5 @@ module.exports = {
   testApi,
   handleRegister,
   handleLogin,
+  handleLogout,
 };
