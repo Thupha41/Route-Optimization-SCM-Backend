@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --exec ./node_modules/.bin/babel-node ./src/server.js"
+    "start": "nodemon --exec ./node_modules/.bin/babel-node ./src/server.js",
+    "build-src": "babel src -d build --copy-files",
+    "build": "node build/server.js"
   },
   "repository": {
     "type": "git",
@@ -18,13 +20,22 @@
   },
   "homepage": "https://github.com/Thupha41/Route-Optimization-SCM-Backend#readme",
   "dependencies": {
-    "@babel/core": "7.15.4",
-    "@babel/node": "7.15.4",
-    "@babel/preset-env": "7.15.4",
+    "bcryptjs": "2.4.3",
     "body-parser": "1.19.1",
+    "cookie-parser": "1.4.6",
     "dotenv": "10.0.0",
     "ejs": "3.1.6",
     "express": "4.17.2",
-    "nodemon": "2.0.15"
+    "jsonwebtoken": "8.5.1",
+    "mysql2": "2.3.3",
+    "sequelize": "6.13.0",
+    "sequelize-cli": "6.3.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.25.7",
+    "@babel/core": "^7.25.7",
+    "@babel/node": "^7.15.4",
+    "@babel/preset-env": "^7.25.7",
+    "nodemon": "^2.0.15"
   }
 }
