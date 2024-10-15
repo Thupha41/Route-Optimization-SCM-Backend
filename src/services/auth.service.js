@@ -3,6 +3,10 @@ import bcrypt from "bcryptjs";
 import { Op } from "sequelize";
 import JWTService from "./JWT.service";
 import { createToken } from "../middleware/JWTAction";
+const {
+  UnauthorizedResponse,
+  ErrorResponse,
+} = require("../core/error.response");
 require("dotenv").config();
 // Configurable salt rounds
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10) || 10;
@@ -41,10 +45,18 @@ class AuthService {
       let user = await checkUserExists(rawUserData.email, rawUserData.phone);
       if (user) {
         if (user.email === rawUserData.email) {
-          return { EM: "The email is already existed!", EC: 0 };
+          return {
+            EC: -1,
+            EM: "The email is already existed!",
+            DT: "email",
+          };
         }
         if (user.phone === rawUserData.phone) {
-          return { EM: "The phone number is already existed!", EC: 0 };
+          return {
+            EC: -1,
+            EM: "The phone number is already existed!",
+            DT: "phone",
+          };
         }
       }
 
@@ -79,40 +91,46 @@ class AuthService {
         rawUserData.valueLogin,
         rawUserData.valueLogin
       );
-      if (user) {
-        let checkPw = checkPassword(rawUserData.password, user.password);
-        if (checkPw) {
-          let roles = await JWTService.getRoleWithPermission(user);
-          let payload = {
-            roles,
-            username: user.username,
-            email: user.email,
-          };
-          console.log(">> check payload", payload);
-          let token = createToken(payload);
-          return {
-            EM: "Login successfully",
-            EC: 1,
-            DT: {
-              accessToken: token,
-              roles,
-              username: user.username,
-              email: user.email,
-            },
-          };
-        }
+
+      if (!user) {
+        throw new UnauthorizedResponse({
+          EM: "Your email/phone is incorrect",
+        });
       }
-      console.log(">>> Not found user with email/phone");
+
+      let checkPw = checkPassword(rawUserData.password, user.password);
+      if (!checkPw) {
+        throw new UnauthorizedResponse({
+          EM: "Your password is incorrect",
+        });
+      }
+
+      let roles = await JWTService.getRoleWithPermission(user);
+      let payload = {
+        roles,
+        username: user.username,
+        email: user.email,
+      };
+
+      let token = createToken(payload);
       return {
-        EM: "Your email/phone or password is incorrect",
-        EC: 0,
+        EM: "Login successfully",
+        EC: 1,
+        DT: {
+          accessToken: token,
+          roles,
+          username: user.username,
+          email: user.email,
+        },
       };
     } catch (error) {
-      console.log(error);
-      return {
+      console.log(">>> check error", error);
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
         EM: "Something wrong with user service!",
-        EC: -1,
-      };
+      });
     }
   };
 }

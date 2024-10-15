@@ -61,8 +61,9 @@ const createUser = async (req, res) => {
 };
 const deleteUser = async (req, res) => {
   try {
-    console.log(">>> check id", req.params.id);
-    let data = await UserService.delete(req.params.id);
+    console.log(">>> check req.body", req.body);
+    console.log(">>> check res params", req.params);
+    let data = await UserService.delete(req.body.id);
     if (data && data.EC === 0) {
       return res.status(404).json({
         EM: data.EM,
