@@ -1,17 +1,11 @@
 import db from "../models/index";
-const {
-  ConflictRequestError,
-  UnauthorizedResponse,
-  ForbiddenRequestError,
-  BadRequestError,
-  ErrorResponse,
-} = require("../core/error.response");
+const { ErrorResponse } = require("../core/error.response");
 class PermissionService {
   static getPermissions = async () => {
     try {
       let permissions = await db.Permission.findAll({
         attributes: ["id", "url", "description"],
-        order: [["url", "ASC"]],
+        order: [["url", "DESC"]],
         raw: true,
       });
 
@@ -31,13 +25,50 @@ class PermissionService {
     } catch (error) {
       console.log(error);
       throw new ErrorResponse({
-        EM: "Something wrong with permission service!",
+        EM: "Something wrong with get permissions service!",
       });
     }
   };
 
-  static create = async (permissions) => {
+  static getPermissionsWithPagination = async (page = 1, limit = 5) => {
     try {
+      page = Math.max(1, parseInt(page, 10));
+      limit = Math.max(1, parseInt(limit, 10));
+      let offset = (page - 1) * limit;
+      const { count, rows } = await db.Permission.findAndCountAll({
+        offset: offset,
+        limit: limit,
+        attributes: ["id", "url", "description"],
+        order: [["url", "DESC"]],
+        raw: true,
+      });
+      let totalPages = Math.ceil(count / limit);
+      let data = {
+        totalRows: count,
+        totalPages: totalPages,
+        permissions: rows,
+      };
+
+      return {
+        EM: `Get list permissions at page ${page}, limit ${limit}`,
+        EC: 1,
+        DT: data.permissions.length > 0 ? data : [],
+      };
+    } catch (error) {
+      console.log(error);
+      throw new ErrorResponse({
+        EM: "Something wrong with get permissions service!",
+      });
+    }
+  };
+
+  static create = async (permissionData) => {
+    try {
+      // Ensure permissionData is always an array
+      const permissions = Array.isArray(permissionData)
+        ? permissionData
+        : [permissionData];
+
       // Step 1: Get current permissions from the database
       let currentPermissions = await this.getPermissions();
       if (!currentPermissions || currentPermissions.EC !== 1) {
@@ -74,9 +105,9 @@ class PermissionService {
       if (newPermissions.length > 0) {
         await db.Permission.bulkCreate(newPermissions);
         return {
-          EM: `Create ${newPermissions.length} permissions successfully`,
+          EM: `Created ${newPermissions.length} permission(s) successfully`,
           EC: 1,
-          DT: [],
+          DT: newPermissions,
         };
       }
 
@@ -89,62 +120,99 @@ class PermissionService {
     } catch (error) {
       console.log(error);
       throw new ErrorResponse({
-        EM: "Something wrong with permission service!",
+        EM: "Something wrong with create permission service!",
       });
     }
   };
 
   static update = async (data) => {
     try {
-      let user = await db.User.update({
+      const { id, url, description } = data;
+
+      const existingPermission = await db.Permission.findOne({
         where: {
-          id: data.id,
+          url: url,
+          id: { [db.Sequelize.Op.ne]: id },
         },
       });
 
-      if (user) {
-        user.save();
-      } else {
-        //not found
-        return {};
+      if (existingPermission) {
+        return {
+          EM: "Permission URL already exists",
+          EC: 0,
+          DT: null,
+        };
       }
+
+      // Update the permission
+      const [updatedRowsCount] = await db.Permission.update(
+        { url, description },
+        {
+          where: { id: id },
+        }
+      );
+
+      if (updatedRowsCount === 0) {
+        return {
+          EM: "Permission not found",
+          EC: 0,
+          DT: null,
+        };
+      }
+
+      // Fetch the updated permission
+      const updatedPermission = await db.Permission.findByPk(id);
+
+      return {
+        EM: "Permission updated successfully",
+        EC: 1,
+        DT: updatedPermission,
+      };
     } catch (error) {
       console.log(error);
-      return {
-        EM: "Error from update user service",
-        EC: -1,
-        DT: "",
-      };
+      throw new ErrorResponse({
+        EM: "Something wrong with update permission service!",
+      });
     }
   };
   static delete = async (id) => {
     try {
-      let result = await db.User.destroy({
-        where: {
-          id: id,
-        },
+      // Step 1: Find the permission by ID
+      const permission = await db.Permission.findOne({
+        where: { id: id },
       });
-      console.log(">>> check delete user", result);
+
+      if (!permission) {
+        return {
+          EM: "Permission not found",
+          EC: 0,
+          DT: null,
+        };
+      }
+
+      // Step 2: Delete the permission
+      let result = await db.Permission.destroy({
+        where: { id: id },
+      });
+
       if (result === 1) {
         return {
-          EM: "User deleted successfully",
+          EM: `Permission '${permission.url}' deleted successfully`,
           EC: 1,
           DT: [],
         };
       } else {
         return {
-          EM: "User not found",
-          EC: 0,
-          DT: "",
+          EM: "Failed to delete the permission",
+          EC: -1,
+          DT: null,
         };
       }
     } catch (error) {
       console.log(error);
-      return {
-        EM: "Error from delete user service",
-        EC: -1,
-        DT: "",
-      };
+      throw new ErrorResponse({
+        EM: "Something wrong with delete permission service!",
+      });
     }
   };
 }
