@@ -81,13 +81,12 @@ const checkUserPermission = (req, res, next) => {
       });
     }
 
+    // Remove the ID from the current path for comparison
+    const currentPathWithoutId = currentPath.replace(/\/\d+/g, "");
+    console.log("Current Path Without ID:", currentPathWithoutId);
     const canAccess = roles.Permissions.some((permission) => {
       const permissionPath = permission.url.toLowerCase();
       console.log("Comparing with:", permissionPath);
-
-      // Remove the ID from the current path for comparison
-      const currentPathWithoutId = currentPath.replace(/\/\d+$/, "");
-      console.log("Current Path Without ID:", currentPathWithoutId);
 
       return currentPathWithoutId.toLowerCase().startsWith(permissionPath);
     });

@@ -1,11 +1,5 @@
 import db from "../models/index";
-const {
-  ConflictRequestError,
-  UnauthorizedResponse,
-  ForbiddenRequestError,
-  BadRequestError,
-  ErrorResponse,
-} = require("../core/error.response");
+const { NotFoundResponse, ErrorResponse } = require("../core/error.response");
 class RoleService {
   static getRoles = async () => {
     try {

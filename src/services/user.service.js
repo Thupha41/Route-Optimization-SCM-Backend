@@ -2,7 +2,12 @@ import db from "../models/index";
 import bcrypt from "bcryptjs";
 // Configurable salt rounds
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10) || 10;
-const { ErrorResponse } = require("../core/error.response");
+const {
+  ErrorResponse,
+  ConflictRequestError,
+  NotFoundResponse,
+  BadRequestResponse,
+} = require("../core/error.response");
 
 // Hashes the password asynchronously
 const hashUserPassword = async (userPassword) => {
@@ -45,7 +50,7 @@ class UserService {
     } catch (error) {
       console.log(error);
       throw new ErrorResponse({
-        EM: "Something wrong with permission service!",
+        EM: "Something wrong with get user service!",
       });
     }
   };
@@ -101,7 +106,10 @@ class UserService {
       });
 
       if (userByEmail) {
-        return { EM: "The email is already existed!", EC: 0, DT: "email" };
+        throw new ConflictRequestError({
+          EM: "The email is already existed!",
+          DT: "email",
+        });
       }
       let userByPhone = await db.User.findOne({
         where: { phone: data.phone },
@@ -109,11 +117,10 @@ class UserService {
       });
 
       if (userByPhone) {
-        return {
+        throw new ConflictRequestError({
           EM: "The phone number is already existed!",
-          EC: 0,
           DT: "phone",
-        };
+        });
       }
 
       //Step 2: hash user password
@@ -127,20 +134,21 @@ class UserService {
       };
     } catch (error) {
       console.log(error);
-      return {
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
         EM: "Something wrong with create user service!",
-        EC: -1,
-      };
+      });
     }
   };
   static update = async (data) => {
     try {
       if (!data.roleId) {
-        return {
-          EC: 0,
-          EM: "Error with empty role",
+        throw new BadRequestResponse({
+          EM: "Role is required",
           DT: "role",
-        };
+        });
       }
 
       // Find user by ID
@@ -149,7 +157,6 @@ class UserService {
       });
 
       if (user) {
-        // Update the user record using the where clause to specify which user to update
         await db.User.update(
           {
             username: data.username,
@@ -168,19 +175,18 @@ class UserService {
           DT: [],
         };
       } else {
-        return {
-          EM: "Failed to update user - user not found",
-          EC: 0,
-          DT: [],
-        };
+        throw new NotFoundResponse({
+          EM: "User not found",
+        });
       }
     } catch (error) {
       console.log(error);
-      return {
-        EM: "Error from update user service",
-        EC: -1,
-        DT: "",
-      };
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
+        EM: "Something wrong with update user service!",
+      });
     }
   };
   static delete = async (id) => {
@@ -190,7 +196,6 @@ class UserService {
           id: id,
         },
       });
-      console.log(">>> check delete user", result);
       if (result === 1) {
         return {
           EM: "User deleted successfully",
@@ -198,19 +203,18 @@ class UserService {
           DT: [],
         };
       } else {
-        return {
+        throw new NotFoundResponse({
           EM: "User not found",
-          EC: 0,
-          DT: "",
-        };
+        });
       }
     } catch (error) {
       console.log(error);
-      return {
-        EM: "Error from delete user service",
-        EC: -1,
-        DT: "",
-      };
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
+        EM: "Something wrong with delete user service!",
+      });
     }
   };
 }

@@ -42,12 +42,17 @@ const initApiRoute = (app) => {
 
   //permission route
   router.get("/permissions/read", PermissionController.getListPermissions);
+  router.get(
+    "/roles/:id/permissions",
+    PermissionController.getPermissionByRole
+  );
   router.post("/permissions/create", PermissionController.createPermission);
   router.put("/permissions/update/:id", PermissionController.updatePermission);
   router.delete(
     "/permissions/delete/:id",
     PermissionController.deletePermission
   );
+
   return app.use("/api/v1", router);
 };
 

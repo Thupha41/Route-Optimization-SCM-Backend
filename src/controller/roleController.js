@@ -30,18 +30,19 @@ const deleteRoles = async (req, res) => {
   try {
     console.log(">>> check id", req.params.id);
     let data = await UserService.delete(req.params.id);
-    return res.status(200).json({
-      EM: data.EM,
-      EC: data.EC,
-      DT: data.DT,
-    });
+    return new OK({
+      EC: roles.EC,
+      EM: roles.EM,
+      DT: roles.DT,
+    }).send(res);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      EM: "Error message from server", // error message
-      EC: "-1", // Error code
-      DT: "", // data
-    });
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Error message from server",
+    }).send(res);
   }
 };
 const updateRoles = async () => {
