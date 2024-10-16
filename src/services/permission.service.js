@@ -1,5 +1,9 @@
 import db from "../models/index";
-const { ErrorResponse } = require("../core/error.response");
+const {
+  ErrorResponse,
+  NotFoundResponse,
+  BadRequestResponse,
+} = require("../core/error.response");
 class PermissionService {
   static getPermissions = async () => {
     try {
@@ -16,11 +20,7 @@ class PermissionService {
           DT: permissions,
         };
       } else {
-        return {
-          EM: "No permissions found",
-          EC: 1,
-          DT: [],
-        };
+        throw new NotFoundResponse({ EM: "Permission not found", DT: [] });
       }
     } catch (error) {
       console.log(error);
@@ -94,11 +94,10 @@ class PermissionService {
 
       // Step 4: If there are duplicate URLs, return an error message with those URLs
       if (duplicateUrls.length > 0) {
-        return {
+        throw new BadRequestResponse({
           EM: `The permission URLs already exist: ${duplicateUrls.join(", ")}`,
-          EC: 0,
           DT: duplicateUrls,
-        };
+        });
       }
 
       // Step 5: Bulk create new permissions if no duplicates
@@ -119,6 +118,9 @@ class PermissionService {
       };
     } catch (error) {
       console.log(error);
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
       throw new ErrorResponse({
         EM: "Something wrong with create permission service!",
       });
@@ -129,6 +131,12 @@ class PermissionService {
     try {
       const { id, url, description } = data;
 
+      // Check if the permission exists
+      const permission = await db.Permission.findByPk(id);
+      if (!permission) {
+        throw new NotFoundResponse({ EM: "Permission not found", DT: [] });
+      }
+
       const existingPermission = await db.Permission.findOne({
         where: {
           url: url,
@@ -137,28 +145,19 @@ class PermissionService {
       });
 
       if (existingPermission) {
-        return {
+        throw new BadRequestResponse({
           EM: "Permission URL already exists",
-          EC: 0,
           DT: null,
-        };
+        });
       }
 
       // Update the permission
-      const [updatedRowsCount] = await db.Permission.update(
+      await db.Permission.update(
         { url, description },
         {
           where: { id: id },
         }
       );
-
-      if (updatedRowsCount === 0) {
-        return {
-          EM: "Permission not found",
-          EC: 0,
-          DT: null,
-        };
-      }
 
       // Fetch the updated permission
       const updatedPermission = await db.Permission.findByPk(id);
@@ -170,6 +169,9 @@ class PermissionService {
       };
     } catch (error) {
       console.log(error);
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
       throw new ErrorResponse({
         EM: "Something wrong with update permission service!",
       });
@@ -183,11 +185,7 @@ class PermissionService {
       });
 
       if (!permission) {
-        return {
-          EM: "Permission not found",
-          EC: 0,
-          DT: null,
-        };
+        throw new NotFoundResponse({ EM: "Permission not found", DT: [] });
       }
 
       // Step 2: Delete the permission
@@ -210,8 +208,50 @@ class PermissionService {
       }
     } catch (error) {
       console.log(error);
+      if (error instanceof NotFoundResponse) {
+        throw error;
+      }
       throw new ErrorResponse({
         EM: "Something wrong with delete permission service!",
+      });
+    }
+  };
+
+  static getPermissionsByRole = async (roleId) => {
+    try {
+      let roles = await db.Role.findOne({
+        where: {
+          id: roleId,
+        },
+        attributes: ["id", "name", "description"],
+        include: [
+          {
+            model: db.Permission,
+            attributes: ["id", "url", "description"],
+            through: {
+              attributes: [],
+            },
+          },
+        ],
+        nest: true,
+      });
+
+      if (!roles) {
+        throw new NotFoundResponse({ EM: "Role not found", DT: [] });
+      }
+
+      return {
+        EM: "Get permissions by role successfully",
+        EC: 1,
+        DT: roles,
+      };
+    } catch (error) {
+      console.log(error);
+      if (error instanceof NotFoundResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
+        EM: "Something wrong with get permissions by role service!",
       });
     }
   };

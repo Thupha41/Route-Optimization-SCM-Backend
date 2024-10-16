@@ -12,11 +12,11 @@ const handleRegister = async (req, res) => {
   try {
     const { email, phone, password } = req.body;
     if (!email || !phone || !password) {
-      return res.status(400).json({
-        EM: "Missing required parameter", // error message
-        EC: "0", // Error code
-        DT: "", // data
-      });
+      return new OK({
+        EC: roles.EC,
+        EM: roles.EM,
+        DT: roles.DT,
+      }).send(res);
     }
     if (password && password.length < 4) {
       return res.status(400).json({
@@ -29,11 +29,11 @@ const handleRegister = async (req, res) => {
     let data = await AuthService.register(req.body);
     console.log(">>> check response code", data.EC);
     // Respond with the error or success message from AuthService
-    return res.status(200).json({
-      EM: data.EM, // error or success message
-      EC: data.EC, // Error code
-      DT: data.DT, // data
-    });
+    return new OK({
+      EC: roles.EC,
+      EM: roles.EM,
+      DT: roles.DT,
+    }).send(res);
   } catch (error) {
     console.error("Error in handleRegister:", error);
     return res.status(500).json({
