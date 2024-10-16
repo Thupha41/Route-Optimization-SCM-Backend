@@ -1,10 +1,11 @@
 import express from "express";
-import {
-  testApi,
-  handleRegister,
-  handleLogin,
-  handleLogout,
-} from "../controller/authController";
+// import {
+//   testApi,
+//   handleRegister,
+//   handleLogin,
+//   handleLogout,
+// } from "../controller/authController";
+import AuthController from "../controller/authController"
 import UserController from "../controller/userController";
 import RoleController from "../controller/roleController";
 import PermissionController from "../controller/permissionController";
@@ -20,13 +21,14 @@ const router = express.Router();
 
 const initApiRoute = (app) => {
   router.all("*", checkUserJWT, checkUserPermission);
-  router.get("/test-api", testApi);
+  router.get("/test-api", AuthController.testApi);
 
   //auth route
   router.get("/account", UserController.getUserAccount);
-  router.post("/register", handleRegister);
-  router.post("/login", handleLogin);
-  router.post("/logout", handleLogout);
+  router.post("/register", AuthController.handleRegister);
+  router.post("/login", AuthController.handleLogin);
+  router.post("/logout", AuthController.handleLogout);
+  router.post("/auth/handleForgetPassword", AuthController.handleForgetPassword);
 
   //user route
   router.get("/users/read", UserController.getListUser);
