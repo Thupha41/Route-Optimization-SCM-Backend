@@ -82,6 +82,45 @@ const handleLogout = (req, res) => {
   }
 };
 
+// const handleForgetPassword = async (req, res) => {
+//   try {
+//     const { email } = req.body;
+
+//     if (!email) {
+//       return res.status(400).json({
+//         EM: "Missing required parameter (email)", // error message
+//         EC: "0", // Error code
+//         DT: "", // data
+//       });
+//     }
+
+//     const user = await db.User.findOne({
+//       where: {
+//         email: userEmail
+//       },
+//       raw: true,
+//     });
+
+//     if (!user) {
+//       return res.status(400).json({
+//         EM: "User is not registered", // error message
+//         EC: "0", // Error code
+//         DT: "", // data
+//       });
+//     }
+
+//     await AuthService.forgetPassword(user);
+
+//   } catch (error) {
+//     console.error("Error in handleForgetPassword:", error);
+//     return res.status(500).json({
+//       EM: "Error message from server", // error message
+//       EC: "-1", // Error code
+//       DT: "", // data
+//     });
+//   }
+// }
+
 module.exports = {
   testApi,
   handleRegister,
