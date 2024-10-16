@@ -1,87 +1,68 @@
 import UserService from "../services/user.service";
-
+import { OK, CREATED } from "../core/success.response";
+import { ErrorResponse } from "../core/error.response";
 const getListUser = async (req, res) => {
   try {
     if (req.query.page && req.query.limit) {
       let page = req.query.page;
       let limit = req.query.limit;
       let users = await UserService.getUserWithPagination(+page, +limit);
-      return res.status(200).json({
-        EM: users.EM, // error or success message
-        EC: users.EC, // Error code
-        DT: users.DT, // data
-      });
+      return new OK({
+        EM: users.EM,
+        EC: users.EC,
+        DT: users.DT,
+      }).send(res);
     } else {
       let users = await UserService.getAll();
-      return res.status(200).json({
-        EM: users.EM, // error or success message
-        EC: users.EC, // Error code
-        DT: users.DT, // data
-      });
+      return new OK({
+        EM: users.EM,
+        EC: users.EC,
+        DT: users.DT,
+      }).send(res);
     }
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      EM: "Error message from server", // error message
-      EC: "-1", // Error code
-      DT: "", // data
-    });
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
   }
 };
 const createUser = async (req, res) => {
   try {
     const result = await UserService.create(req.body);
-    if (result.EC === 1) {
-      return res.status(201).json({
-        EM: result.EM,
-        EC: result.EC,
-        DT: [],
-      });
-    } else if (result.EC === 0) {
-      return res.status(409).json({
-        EM: result.EM,
-        EC: result.EC,
-        DT: result.DT,
-      });
-    } else {
-      return res.status(500).json({
-        EM: result.EM,
-        EC: result.EC,
-        DT: result.DT,
-      });
-    }
+    return new CREATED({
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT,
+    }).send(res);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      EM: "Something went wrong while creating the user.",
-      EC: -1,
-      DT: "",
-    });
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    console.error("Unexpected error:", error);
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
   }
 };
 const deleteUser = async (req, res) => {
   try {
-    console.log(">>> check id", req.params.id);
     let data = await UserService.delete(req.params.id);
-    if (data && data.EC === 0) {
-      return res.status(404).json({
-        EM: data.EM,
-        EC: data.EC,
-        DT: data.DT,
-      });
-    }
-    return res.status(200).json({
+    return new OK({
       EM: data.EM,
       EC: data.EC,
       DT: data.DT,
-    });
+    }).send(res);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      EM: "Error message from server", // error message
-      EC: "-1", // Error code
-      DT: "", // data
-    });
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    console.error("Unexpected error:", error);
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
   }
 };
 const updateUser = async (req, res) => {
@@ -95,45 +76,31 @@ const updateUser = async (req, res) => {
 
     let response = await UserService.update(data);
 
-    if (response && response.EC === 0) {
-      return res.status(404).json({
-        EM: response.EM,
-        EC: response.EC,
-        DT: response.DT,
-      });
-    } else if (response && +response.EC === -1) {
-      return res.status(500).json({
-        EM: response.EM,
-        EC: response.EC,
-        DT: response.DT,
-      });
-    }
-
-    return res.status(200).json({
+    return new OK({
       EM: response.EM,
       EC: response.EC,
       DT: response.DT,
-    });
+    }).send(res);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
-      EM: "Error message from server",
-      EC: -1,
-      DT: "",
-    });
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
   }
 };
 const getUserAccount = (req, res) => {
-  return res.status(200).json({
-    EM: "ok",
-    EC: 1,
+  return new OK({
+    EM: "get user detail successfully",
     DT: {
       accessToken: req.token,
       username: req.user.username,
       email: req.user.email,
       roleWithPermission: req.user.roles,
     },
-  });
+  }).send(res);
 };
 module.exports = {
   getListUser,

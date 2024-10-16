@@ -58,11 +58,20 @@ class NotFoundResponse extends ErrorResponse {
     return StatusCodes.NOT_FOUND; // Status code for not found is 404
   }
 }
+class ConflictRequestError extends ErrorResponse {
+  constructor({ EM = ReasonPhrases.CONFLICT, DT = {} }) {
+    super({ EM, DT });
+  }
 
+  getStatusCode() {
+    return StatusCodes.CONFLICT; // Status code for not found is 409
+  }
+}
 module.exports = {
   ErrorResponse,
   BadRequestResponse,
   UnauthorizedResponse,
   ForbiddenResponse,
   NotFoundResponse,
+  ConflictRequestError,
 };
