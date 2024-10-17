@@ -20,20 +20,33 @@ const getListRoles = async (req, res) => {
   }
 };
 
-const createRoles = async () => {
+const createRole = async (req, res) => {
   try {
+    const result = await RoleService.create(req.body);
+    return new CREATED({
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT,
+    }).send(res);
   } catch (error) {
     console.log(error);
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    console.error("Unexpected error:", error);
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
   }
 };
-const deleteRoles = async (req, res) => {
+const deleteRole = async (req, res) => {
   try {
     console.log(">>> check id", req.params.id);
-    let data = await UserService.delete(req.params.id);
+    let data = await RoleService.delete(req.params.id);
     return new OK({
-      EC: roles.EC,
-      EM: roles.EM,
-      DT: roles.DT,
+      EC: data.EC,
+      EM: data.EM,
+      DT: data.DT,
     }).send(res);
   } catch (error) {
     console.log(error);
@@ -45,16 +58,36 @@ const deleteRoles = async (req, res) => {
     }).send(res);
   }
 };
-const updateRoles = async () => {
+const updateRole = async (req, res) => {
   try {
+    const { id } = req.params;
+
+    const data = {
+      id,
+      ...req.body,
+    };
+
+    let response = await RoleService.update(data);
+
+    return new OK({
+      EM: response.EM,
+      EC: response.EC,
+      DT: response.DT,
+    }).send(res);
   } catch (error) {
     console.log(error);
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
   }
 };
 
 module.exports = {
   getListRoles,
-  createRoles,
-  deleteRoles,
-  updateRoles,
+  createRole,
+  deleteRole,
+  updateRole,
 };

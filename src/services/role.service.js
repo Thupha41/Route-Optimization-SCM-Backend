@@ -1,5 +1,6 @@
 import db from "../models/index";
 const { NotFoundResponse, ErrorResponse } = require("../core/error.response");
+
 class RoleService {
   static getRoles = async () => {
     try {
@@ -37,34 +38,57 @@ class RoleService {
 
   static create = async (data) => {
     try {
-      let role = await db.Role.create({});
+      await db.Role.create(data);
+
+      return {
+        EM: "Role created successfully.",
+        EC: 1,
+        DT: [],
+      };
+
     } catch (error) {
       console.log(error);
-      return {
-        EM: "Error from get user service",
-        EC: -1,
-        DT: "",
-      };
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
+        EM: "Something's wrong with creating a role!",
+      });
     }
   };
   static update = async (data) => {
     try {
-      let user = await db.User.update({
+      let role = await db.Role.findOne({
         where: {
           id: data.id,
         },
       });
 
-      if (user) {
-        user.save();
+      if (role) {
+        await db.Role.update(
+          {
+            name: data.name, 
+            description: data.description
+          },
+          {
+            where: { id: data.id },
+          }
+        );
+
+        return {
+          EM: "Update role successfully",
+          EC: 1,
+          DT: [],
+        };
       } else {
-        //not found
-        return {};
+        throw new NotFoundResponse({
+          EM: "Role not found",
+        });
       }
     } catch (error) {
       console.log(error);
       return {
-        EM: "Error from update user service",
+        EM: "Something's wrong with updating this role!",
         EC: -1,
         DT: "",
       };
@@ -72,29 +96,22 @@ class RoleService {
   };
   static delete = async (id) => {
     try {
-      let result = await db.User.destroy({
+      await db.Role.destroy({
         where: {
           id: id,
         },
       });
-      console.log(">>> check delete user", result);
-      if (result === 1) {
-        return {
-          EM: "User deleted successfully",
-          EC: 1,
-          DT: [],
-        };
-      } else {
-        return {
-          EM: "User not found",
-          EC: 0,
-          DT: "",
-        };
-      }
+      
+      return {
+        EM: "Role deleted successfully",
+        EC: 1,
+        DT: [],
+      };
+    
     } catch (error) {
       console.log(error);
       return {
-        EM: "Error from delete user service",
+        EM: "Error from delete role service",
         EC: -1,
         DT: "",
       };
