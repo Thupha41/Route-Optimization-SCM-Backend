@@ -255,6 +255,91 @@ class PermissionService {
       });
     }
   };
+
+  // static assignPermissionToRole = async (data) => {
+  //   try {
+  //     await db.Permission_Role.destroy({
+  //       where: {
+  //         roleId: +data.roleId,
+  //       },
+  //     });
+  //     await db.Permission_Role.bulkCreate(data.rolePermissions);
+  //     return {
+  //       EM: "Assign permission to role successfully",
+  //       EC: 1,
+  //       DT: [],
+  //     };
+  //   } catch (error) {
+  //     console.log(error);
+  //     if (error instanceof NotFoundResponse) {
+  //       throw error;
+  //     }
+  //     throw new ErrorResponse({
+  //       EM: "Something wrong with assign permission to role service!",
+  //     });
+  //   }
+  // };
+
+  static assignPermissionToRole = async (data) => {
+    try {
+      if (!data.roleId || !Array.isArray(data.rolePermissions)) {
+        throw new BadRequestResponse({
+          EM: "Invalid input data for assigning permissions to role",
+        });
+      }
+
+      const role = await db.Role.findByPk(data.roleId);
+      if (!role) {
+        throw new NotFoundResponse({ EM: "Role not found", DT: [] });
+      }
+
+      const transaction = await db.sequelize.transaction();
+
+      try {
+        await db.Permission_Role.destroy({
+          where: { roleId: data.roleId },
+          transaction,
+        });
+
+        const validPermissions = await db.Permission.findAll({
+          where: { id: data.rolePermissions.map((rp) => rp.permissionId) },
+          attributes: ["id"],
+          raw: true,
+        });
+
+        const validPermissionIds = new Set(validPermissions.map((p) => p.id));
+        const rolePermissions = data.rolePermissions
+          .filter((rp) => validPermissionIds.has(rp.permissionId))
+          .map((rp) => ({ ...rp, roleId: data.roleId }));
+
+        if (rolePermissions.length !== data.rolePermissions.length) {
+          throw new BadRequestResponse({
+            EM: "Some permission IDs are invalid",
+          });
+        }
+        await db.Permission_Role.bulkCreate(rolePermissions, { transaction });
+
+        await transaction.commit();
+
+        return {
+          EM: "Permissions assigned to role successfully",
+          EC: 1,
+          DT: [],
+        };
+      } catch (error) {
+        await transaction.rollback();
+        throw error;
+      }
+    } catch (error) {
+      console.log(error);
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
+        EM: "Something went wrong with assign permission to role service!",
+      });
+    }
+  };
 }
 
 module.exports = PermissionService;
