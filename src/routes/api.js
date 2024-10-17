@@ -5,7 +5,7 @@ import express from "express";
 //   handleLogin,
 //   handleLogout,
 // } from "../controller/authController";
-import AuthController from "../controller/authController"
+import AuthController from "../controller/authController";
 import UserController from "../controller/userController";
 import RoleController from "../controller/roleController";
 import PermissionController from "../controller/permissionController";
@@ -28,7 +28,7 @@ const initApiRoute = (app) => {
   router.post("/register", AuthController.handleRegister);
   router.post("/login", AuthController.handleLogin);
   router.post("/logout", AuthController.handleLogout);
-  router.post("/auth/handleForgetPassword", AuthController.handleForgetPassword);
+  // router.post("/auth/handleForgetPassword", AuthController.handleForgetPassword);
 
   //user route
   router.get("/users/read", UserController.getListUser);
@@ -49,6 +49,10 @@ const initApiRoute = (app) => {
     PermissionController.getPermissionByRole
   );
   router.post("/permissions/create", PermissionController.createPermission);
+  router.post(
+    "/permissions/assign-to-role",
+    PermissionController.assignPermissionToRole
+  );
   router.put("/permissions/update/:id", PermissionController.updatePermission);
   router.delete(
     "/permissions/delete/:id",
