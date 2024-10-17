@@ -8,6 +8,7 @@ import express from "express";
 import AuthController from "../controller/authController"
 import UserController from "../controller/userController";
 import RoleController from "../controller/roleController";
+import SupplierController from "../controller/supplierController";
 import PermissionController from "../controller/permissionController";
 import { checkUserJWT, checkUserPermission } from "../middleware/JWTAction";
 const router = express.Router();
@@ -28,7 +29,7 @@ const initApiRoute = (app) => {
   router.post("/register", AuthController.handleRegister);
   router.post("/login", AuthController.handleLogin);
   router.post("/logout", AuthController.handleLogout);
-  router.post("/auth/handleForgetPassword", AuthController.handleForgetPassword);
+  // router.post("/auth/handleForgetPassword", AuthController.handleForgetPassword);
 
   //user route
   router.get("/users/read", UserController.getListUser);
@@ -38,23 +39,24 @@ const initApiRoute = (app) => {
 
   //roles route
   router.get("/roles/read", RoleController.getListRoles);
-  router.post("/roles/create", RoleController.createRoles);
-  router.put("/roles/update/:id", RoleController.updateRoles);
-  router.delete("/roles/delete/:id", RoleController.deleteRoles);
+  router.post("/roles/create", RoleController.createRole);
+  router.put("/roles/update/:id", RoleController.updateRole);
+  router.delete("/roles/delete/:id", RoleController.deleteRole);
+
+  //Supplier route
+  router.get("/suppliers/read", SupplierController.getListSuppliers);
+  router.post("/suppliers/create", SupplierController.createSupplier);
+  router.put("/suppliers/update/:id", SupplierController.updateSupplier);
+  router.delete("/suppliers/delete/:id", SupplierController.deleteSupplier);
 
   //permission route
   router.get("/permissions/read", PermissionController.getListPermissions);
-  router.get(
-    "/roles/:id/permissions",
-    PermissionController.getPermissionByRole
-  );
   router.post("/permissions/create", PermissionController.createPermission);
   router.put("/permissions/update/:id", PermissionController.updatePermission);
   router.delete(
     "/permissions/delete/:id",
     PermissionController.deletePermission
   );
-
   return app.use("/api/v1", router);
 };
 
