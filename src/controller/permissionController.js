@@ -113,10 +113,68 @@ const getPermissionByRole = async (req, res) => {
   }
 };
 
+// const assignPermissionToRole = async (req, res) => {
+//   try {
+//     const result = await PermissionService.assignPermissionToRole(
+//       req.body.data
+//     );
+//     return new OK({
+//       EC: result.EC,
+//       EM: result.EM,
+//       DT: result.DT,
+//     }).send(res);
+//   } catch (error) {
+//     console.log(error);
+//     if (error instanceof ErrorResponse) {
+//       return error.send(res);
+//     }
+//     return new ErrorResponse({
+//       EM: "Error message from server",
+//     }).send(res);
+//   }
+// };
+
+const assignPermissionToRole = async (req, res) => {
+  try {
+    if (
+      !req.body.data ||
+      !req.body.data.roleId ||
+      !Array.isArray(req.body.data.rolePermissions)
+    ) {
+      return new BadRequestResponse({
+        EM: "Invalid request data",
+      }).send(res);
+    }
+    const roleId = req.body.data.roleId;
+    req.body.data.rolePermissions = req.body.data.rolePermissions.map((rp) => ({
+      ...rp,
+      roleId: roleId,
+    }));
+
+    const result = await PermissionService.assignPermissionToRole(
+      req.body.data
+    );
+    return new OK({
+      EC: result.EC,
+      EM: result.EM,
+      DT: result.DT,
+    }).send(res);
+  } catch (error) {
+    console.log(error);
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Error assigning permissions to role",
+    }).send(res);
+  }
+};
+
 module.exports = {
   getListPermissions,
   createPermission,
   deletePermission,
   updatePermission,
   getPermissionByRole,
+  assignPermissionToRole,
 };
