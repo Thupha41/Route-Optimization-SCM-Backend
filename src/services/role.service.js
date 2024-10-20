@@ -67,8 +67,7 @@ class RoleService {
       if (role) {
         await db.Role.update(
           {
-            name: data.name, 
-            description: data.description
+            data
           },
           {
             where: { id: data.id },
