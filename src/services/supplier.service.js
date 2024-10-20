@@ -66,19 +66,7 @@ class SupplierService {
       if (supplier) {
         await db.Supplier.update(
           {
-            company_code: data.company_code, 
-            company_name: data.company_name, 
-            phone_number: data.phone_number, 
-            representative_name: data.representative_name, 
-            address: data.address, 
-            hasDeliveryTeam: data.hasDeliveryTeam,
-            capacity: data.capacity,
-            market: data.market,
-            scale: data.scale,
-            product_service: data.product_service,
-            sector: data.sector,
-            year: data.year,
-            tax_code: data.tax_code,
+            data
           },
           {
             where: { id: data.id },

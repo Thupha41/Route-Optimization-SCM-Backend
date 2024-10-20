@@ -159,10 +159,7 @@ class UserService {
       if (user) {
         await db.User.update(
           {
-            username: data.username,
-            sex: data.sex,
-            address: data.address,
-            roleId: data.roleId,
+            data
           },
           {
             where: { id: data.id },

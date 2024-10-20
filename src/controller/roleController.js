@@ -1,6 +1,7 @@
 import RoleService from "../services/role.service";
 import { OK, CREATED, NO_CONTENT } from "../core/success.response";
 import { ErrorResponse } from "../core/error.response";
+
 const getListRoles = async (req, res) => {
   try {
     let roles = await RoleService.getRoles();

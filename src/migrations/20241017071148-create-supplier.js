@@ -48,10 +48,14 @@ module.exports = {
         type: Sequelize.STRING,
       },
       year: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
       tax_code: {
         type: Sequelize.STRING,
+      },
+      description: {
+        type: Sequelize.STRING,
+        allowNull: true
       },
       createdAt: {
         allowNull: false,
