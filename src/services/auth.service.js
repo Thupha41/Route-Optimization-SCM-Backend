@@ -8,6 +8,7 @@ const {
   UnauthorizedResponse,
   ErrorResponse,
 } = require("../core/error.response");
+import { v4 as uuidv4 } from "uuid";
 
 require("dotenv").config();
 // Configurable salt rounds
@@ -132,12 +133,13 @@ class AuthService {
           EM: "Your password is incorrect",
         });
       }
-
-      let roles = await JWTService.getRoleWithPermission(user);
+      const code = uuidv4();
+      let roleWithPermission = await JWTService.getRoleWithPermission(user);
       let payload = {
-        roles,
+        roleWithPermission,
         username: user.username,
         email: user.email,
+        code: code,
       };
 
       let token = createToken(payload);
@@ -145,12 +147,63 @@ class AuthService {
         EM: "Login successfully",
         EC: 1,
         DT: {
-          accessToken: token,
-          roles,
+          access_token: token,
+          roleWithPermission,
           username: user.username,
           email: user.email,
+          code: code,
         },
       };
+    } catch (error) {
+      console.log(">>> check error", error);
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
+        EM: "Something wrong with user service!",
+      });
+    }
+  };
+  static updateRefreshToken = async (email, refreshToken) => {
+    try {
+      await db.User.update(
+        { refreshToken },
+        { where: { email: email.trim() } }
+      );
+    } catch (error) {
+      console.log(">>> check error", error);
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
+        EM: "Something wrong with user service!",
+      });
+    }
+  };
+
+  static upsertUserGoogleLogin = async (typeLogin, rawData) => {
+    try {
+      let user = null;
+      if (typeLogin === "google") {
+        user = await db.User.findOne({
+          where: { email: rawData.email, typeLogin: typeLogin },
+          raw: true,
+        });
+        if (!user) {
+          // Create a new account
+          user = await db.User.create({
+            email: rawData.email,
+            username: rawData.username,
+            typeLogin: typeLogin,
+            roleId: 1,
+          });
+          user = user.get({ plain: true });
+        }
+        // Get role with permission
+        const roleWithPermission = await JWTService.getRoleWithPermission(user);
+        user.roleWithPermission = roleWithPermission;
+      }
+      return user;
     } catch (error) {
       console.log(">>> check error", error);
       if (error instanceof ErrorResponse) {

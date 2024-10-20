@@ -72,9 +72,6 @@ const getListUser = async () => {
     nest: true,
   });
 
-  console.log(">>> check new user", userById);
-  console.log(">>> check roles1", roles1);
-  console.log(">>> check roles", roles);
   try {
     // const [results, fields] = await sequelize.query("SELECT * FROM User");
     // console.log(">>> CHECK get list user", results);

@@ -1,6 +1,7 @@
 import AuthService from "../services/auth.service";
 import { OK, CREATED, NO_CONTENT } from "../core/success.response";
 import { ErrorResponse } from "../core/error.response";
+
 const testApi = (req, res) => {
   res.status(200).json({
     message: "ok",
@@ -13,9 +14,8 @@ const handleRegister = async (req, res) => {
     const { email, phone, password } = req.body;
     if (!email || !phone || !password) {
       return new OK({
-        EC: roles.EC,
-        EM: roles.EM,
-        DT: roles.DT,
+        EM: "",
+        DT: "",
       }).send(res);
     }
     if (password && password.length < 4) {
@@ -30,9 +30,9 @@ const handleRegister = async (req, res) => {
     console.log(">>> check response code", data.EC);
     // Respond with the error or success message from AuthService
     return new OK({
-      EC: roles.EC,
-      EM: roles.EM,
-      DT: roles.DT,
+      EC: data.EC,
+      EM: data.EM,
+      DT: data.DT,
     }).send(res);
   } catch (error) {
     console.error("Error in handleRegister:", error);
@@ -44,12 +44,17 @@ const handleRegister = async (req, res) => {
   }
 };
 
+const getLoginPage = (req, res) => {
+  const { serviceURL } = req.query;
+  return res.render("login.ejs", {
+    redirectURL: serviceURL,
+  });
+};
 const handleLogin = async (req, res) => {
   try {
     let data = await AuthService.login(req.body);
-
-    if (data && data.DT && data.DT.accessToken) {
-      res.cookie("jwt", data.DT.accessToken, { httpOnly: true });
+    if (data && data.DT && data.DT.access_token) {
+      res.cookie("access_token", data.DT.access_token, { httpOnly: true });
     }
 
     return new OK({
@@ -70,7 +75,8 @@ const handleLogin = async (req, res) => {
 
 const handleLogout = (req, res) => {
   try {
-    res.clearCookie("jwt");
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
     return new OK({
       EM: "Clear cookies successfully",
     }).send(res);
@@ -81,6 +87,55 @@ const handleLogout = (req, res) => {
     }).send(res);
   }
 };
+
+// const verifySSOToken = async (req, res) => {
+//   try {
+//     const { ssoToken } = req.body;
+//     console.log(ssoToken);
+
+//     if (req.user && req.user.code && req.user.code === ssoToken) {
+//       const refreshToken = uuidv4();
+
+//       //update user refresh token
+//       await AuthService.updateRefreshToken(req.user.email, refreshToken);
+
+//       //set cookies
+//       if (data && data.DT && data.DT.accessToken) {
+//         res.cookie("access-token", data.DT.accessToken, { httpOnly: true });
+//       }
+
+//       let token = createToken(payload);
+
+//       const resData = {
+//         jwt: token,
+//         refresh_token: refreshToken,
+//       };
+
+//       //destroy session
+//       req.session.destroy(function (err) {
+//         req.logout();
+//       });
+
+//       return new OK({
+//         EM: "Verify token successfully",
+//         DT: resData,
+//       }).send(res);
+//     } else {
+//       return new UnauthorizedResponse({
+//         EM: "not match sso token",
+//         DT: "",
+//       }).send(res);
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     if (error instanceof ErrorResponse) {
+//       return error.send(res);
+//     }
+//     return new ErrorResponse({
+//       EM: "Error verifying SSO token",
+//     }).send(res);
+//   }
+// };
 
 // const handleForgetPassword = async (req, res) => {
 //   try {
@@ -126,4 +181,6 @@ module.exports = {
   handleRegister,
   handleLogin,
   handleLogout,
+  getLoginPage,
+  // verifySSOToken,
 };

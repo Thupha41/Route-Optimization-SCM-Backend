@@ -1,0 +1,21 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  </head>
+  <script>
+    $(document).ready(function () {
+      const ssoToken = $("#ssoToken").val();
+      const redirectURL = `${localStorage.getItem(
+        "clientURL"
+      )}/code?ssoToken=${ssoToken}`;
+      localStorage.removeItem("clientURL");
+      window.location.href = redirectURL;
+    });
+  </script>
+  <body>
+    <input id="ssoToken" hidden value="<%= ssoToken %>" />
+  </body>
+</html>
