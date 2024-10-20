@@ -1,7 +1,7 @@
 import db from "../models/index";
 class JWTService {
   static getRoleWithPermission = async (user) => {
-    let roles = await db.Role.findOne({
+    let roleWithPermission = await db.Role.findOne({
       where: {
         id: user.roleId,
       },
@@ -17,7 +17,7 @@ class JWTService {
       ],
     });
 
-    return roles ? roles : {};
+    return roleWithPermission ? roleWithPermission : {};
   };
 }
 

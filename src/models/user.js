@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
       sex: DataTypes.STRING,
       phone: DataTypes.STRING,
       roleId: DataTypes.INTEGER,
+      refreshToken: DataTypes.STRING,
+      typeLogin: {
+        type: DataTypes.STRING,
+        defaultValue: "local",
+      },
     },
     {
       sequelize: sequelize,

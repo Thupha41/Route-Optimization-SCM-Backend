@@ -30,14 +30,15 @@ const checkUserJWT = (req, res, next) => {
   //extract token from header
   const tokenFromHeader = extractToken(req);
   let cookies = req.cookies;
-  if ((cookies && cookies.jwt) || tokenFromHeader) {
-    let token = cookies && cookies.jwt ? cookies.jwt : tokenFromHeader;
-    console.log(">>> check cookies", cookies);
-    let decoded = verifyToken(token);
+  if ((cookies && cookies.access_token) || tokenFromHeader) {
+    let access_token =
+      cookies && cookies.access_token ? cookies.access_token : tokenFromHeader;
+    let decoded = verifyToken(access_token);
     if (decoded) {
-      console.log(">>> check decoded", decoded);
+      decoded.access_token = access_token;
+      decoded.refresh_token = cookies.refresh_token;
       req.user = decoded;
-      req.token = token;
+      console.log(">>> check user", req.user);
       next();
     } else {
       return res.status(401).json({
@@ -69,11 +70,14 @@ const checkUserPermission = (req, res, next) => {
   }
 
   if (req.user) {
-    const { roles } = req.user;
+    const { roleWithPermission } = req.user;
     const currentPath = req.path;
     console.log("Current Path:", currentPath);
 
-    if (!roles.Permissions || roles.Permissions.length === 0) {
+    if (
+      !roleWithPermission.Permissions ||
+      roleWithPermission.Permissions.length === 0
+    ) {
       return res.status(403).json({
         EC: -1,
         EM: "You don't have any permissions assigned!",
@@ -84,7 +88,7 @@ const checkUserPermission = (req, res, next) => {
     // Remove the ID from the current path for comparison
     const currentPathWithoutId = currentPath.replace(/\/\d+/g, "");
     console.log("Current Path Without ID:", currentPathWithoutId);
-    const canAccess = roles.Permissions.some((permission) => {
+    const canAccess = roleWithPermission.Permissions.some((permission) => {
       const permissionPath = permission.url.toLowerCase();
       console.log("Comparing with:", permissionPath);
 

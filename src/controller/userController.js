@@ -96,10 +96,11 @@ const getUserAccount = (req, res) => {
   return new OK({
     EM: "get user detail successfully",
     DT: {
-      accessToken: req.token,
+      access_token: req.user.access_token,
+      refresh_token: req.user.refresh_token,
       username: req.user.username,
       email: req.user.email,
-      roleWithPermission: req.user.roles,
+      roleWithPermission: req.user.roleWithPermission,
     },
   }).send(res);
 };

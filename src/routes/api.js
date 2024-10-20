@@ -29,6 +29,7 @@ const initApiRoute = (app) => {
   router.post("/register", AuthController.handleRegister);
   router.post("/login", AuthController.handleLogin);
   router.post("/logout", AuthController.handleLogout);
+  // router.get("/login", checkUser.isLogin, loginController.getLoginPage);
   // router.post("/auth/handleForgetPassword", AuthController.handleForgetPassword);
 
   //user route
