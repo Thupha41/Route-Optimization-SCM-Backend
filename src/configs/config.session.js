@@ -33,9 +33,9 @@ const configSession = (app) => {
       proxy: true, // if you do SSL outside of node.
       saveUninitialized: false,
       checkExpirationInterval: 15 * 60 * 1000, // The interval at which to cleanup expired sessions in milliseconds.
-      expiration: 300 * 1000,
+      expiration: 500 * 1000,
       cookie: {
-        expires: 300 * 1000,
+        expires: 500 * 1000,
       },
     })
   );

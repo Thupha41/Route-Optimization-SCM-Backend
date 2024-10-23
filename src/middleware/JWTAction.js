@@ -1,8 +1,14 @@
 import jwt from "jsonwebtoken";
 require("dotenv").config();
-
+import { v4 as uuidv4 } from "uuid";
+import AuthService from "../services/auth.service";
 let key = process.env.JWT_SECRET;
-const nonSecurePaths = ["/logout", "/register", "/login"];
+const nonSecurePaths = [
+  "/logout",
+  "/register",
+  "/login",
+  "/verify-services-jwt",
+];
 const createToken = (payload) => {
   let token = null;
   try {
@@ -19,12 +25,14 @@ const verifyToken = (token) => {
   try {
     decoded = jwt.verify(token, key);
   } catch (error) {
-    console.log(error);
+    if (error instanceof jwt.TokenExpiredError) {
+      return "Token expired error";
+    }
   }
   return decoded;
 };
 
-const checkUserJWT = (req, res, next) => {
+const checkUserJWT = async (req, res, next) => {
   if (nonSecurePaths.includes(req.path)) return next();
 
   //extract token from header
@@ -34,12 +42,41 @@ const checkUserJWT = (req, res, next) => {
     let access_token =
       cookies && cookies.access_token ? cookies.access_token : tokenFromHeader;
     let decoded = verifyToken(access_token);
-    if (decoded) {
+    if (decoded && decoded !== "Token expired error") {
       decoded.access_token = access_token;
       decoded.refresh_token = cookies.refresh_token;
       req.user = decoded;
       console.log(">>> check user", req.user);
       next();
+    } else if (decoded && decoded === "Token expired error") {
+      // handle refresh token
+      if (cookies && cookies.refresh_token) {
+        let generateNewToken = await handleRefreshToken(cookies.refresh_token);
+        let newAccessToken = generateNewToken.newAccessToken;
+        let newRefreshToken = generateNewToken.newRefreshToken;
+        //set cookies
+        if (newAccessToken && newRefreshToken) {
+          res.cookie("refresh_token", newRefreshToken, {
+            httpOnly: true,
+            maxAge: 60 * 60 * 24 * 1000,
+          });
+          res.cookie("access_token", newAccessToken, {
+            httpOnly: true,
+            maxAge: 15 * 60 * 1000,
+          });
+        }
+        return res.status(405).json({
+          EC: -1,
+          EM: "Need to retry with new token",
+          DT: "",
+        });
+      } else {
+        return res.status(401).json({
+          EC: -1,
+          EM: "User not authenticated",
+          DT: "",
+        });
+      }
     } else {
       return res.status(401).json({
         EC: -1,
@@ -78,11 +115,7 @@ const checkUserPermission = (req, res, next) => {
       !roleWithPermission.Permissions ||
       roleWithPermission.Permissions.length === 0
     ) {
-      return res.status(403).json({
-        EC: -1,
-        EM: "You don't have any permissions assigned!",
-        DT: "",
-      });
+      throw new ForbiddenResponse("You don't have any permissions assigned!");
     }
 
     // Remove the ID from the current path for comparison
@@ -105,12 +138,37 @@ const checkUserPermission = (req, res, next) => {
       });
     }
   } else {
+    // throw new UnauthorizedResponse("User not authenticated");
     return res.status(401).json({
       EC: -1,
       EM: "User not authenticated",
       DT: "",
     });
   }
+};
+
+const handleRefreshToken = async (refreshToken) => {
+  let newAccessToken = "";
+  let newRefreshToken = "";
+  //get user by refresh token
+  let user = await AuthService.getUserByRefreshToken(refreshToken);
+  if (user) {
+    let payloadAccessToken = {
+      roleWithPermission: user.roleWithPermission,
+      username: user.username,
+      email: user.email,
+    };
+
+    newAccessToken = createToken(payloadAccessToken);
+    newRefreshToken = uuidv4();
+
+    //update user with new refresh token
+    await AuthService.updateRefreshToken(user.email, newRefreshToken);
+  }
+  return {
+    newAccessToken,
+    newRefreshToken,
+  };
 };
 
 module.exports = {

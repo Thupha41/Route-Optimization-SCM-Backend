@@ -81,6 +81,13 @@
         localStorage.setItem("clientURL", $("#redirectURL").val());
         window.location.href = "/auth/google";
       });
+      const password = document.getElementById("password");
+      password.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById("btn-login").click();
+        }
+      });
     });
   </script>
   <body>
@@ -184,66 +191,5 @@
         </div>
       </div>
     </div>
-    <!-- <div class="container">
-      <div class="row">
-          <div class="login-container col-6 mx-auto">
-            <fieldset class="border rounded-3 p-3">
-              <legend class="float-none w-auto px-3">Login form:</legend>
-
-                <div class="alert alert-danger my-1 none-error-message" role="alert" id="error-message">
-                </div>
-              <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label"
-                  >Username</label
-                >
-                
-              <div class="input-group has-validation">
-                <input
-                  name="username"
-                  type="text"
-                  class="form-control"
-                  id="username"
-                />
-
-                <div class="invalid-feedback">
-                  Please choose a username
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label"
-                  >Password</label
-                >
-
-                <div class="input-group has-validation">
-                  <input
-                  type="password"
-                  class="form-control"
-                  id="password"
-                  name="password"
-                />
-                  <div class="invalid-feedback">
-                    Please choose a username
-                  </div>
-                </div>
-              </div>
-
-              <button type="button" id="btn-login" class="btn btn-primary">Login</button>
-            </hr>
-            <div>
-              <div class="d-flex justify-content-center">
-                <span>or login with</span>
-              </div>
-              <div class="social d-flex justify-content-center">
-                <i class="bi bi-google" title="Login with Google"></i>
-                <i class="bi bi-facebook" title="Login with Facebook"></i>
-              </div>
-
-            </div>
-            </fieldset>
-          </div>
-      </div>
-    </div> -->
   </body>
 </html>
