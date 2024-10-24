@@ -75,4 +75,14 @@ router.get(
   }
 );
 
+//forgot password
+router.get("/forgot-password", loginController.getForgotPasswordPage);
+router.get("/verify-forgot-code", loginController.getVerifyForgotCodePage);
+router.get("/reset-password", loginController.getResetPasswordPage);
+
+router.post("/send-code", loginController.sendCode);
+router.post("/verify-forgot-code", loginController.handleVerifyForgotCode);
+router.post("/resend-code", loginController.resendCode);
+router.post("/reset-password", loginController.handleResetPassword);
+
 module.exports = router;

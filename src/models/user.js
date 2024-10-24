@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       User.belongsTo(models.Role, { foreignKey: "roleId" });
+      User.hasMany(models.ResetPasswordToken, { foreignKey: "userID" });
     }
   }
   User.init(

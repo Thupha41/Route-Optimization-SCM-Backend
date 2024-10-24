@@ -1,10 +1,4 @@
 import express from "express";
-// import {
-//   testApi,
-//   handleRegister,
-//   handleLogin,
-//   handleLogout,
-// } from "../controller/authController";
 import AuthController from "../controller/authController";
 import UserController from "../controller/userController";
 import RoleController from "../controller/roleController";
@@ -23,6 +17,9 @@ const router = express.Router();
 const initApiRoute = (app) => {
   router.all("*", checkUserJWT, checkUserPermission);
   router.get("/test-api", AuthController.testApi);
+
+  //service route
+  // router.post("/verify-services-jwt", checkServicesJWT);
 
   //auth route
   router.get("/account", UserController.getUserAccount);

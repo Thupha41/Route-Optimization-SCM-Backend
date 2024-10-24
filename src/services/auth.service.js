@@ -14,33 +14,6 @@ require("dotenv").config();
 // Configurable salt rounds
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10) || 10;
 
-// Hashes the password asynchronously
-const hashUserPassword = async (userPassword) => {
-  try {
-    const salt = await bcrypt.genSalt(SALT_ROUNDS);
-    const hash = await bcrypt.hash(userPassword, salt);
-    return hash;
-  } catch (error) {
-    console.error("Error hashing password:", error);
-    throw error;
-  }
-};
-
-// Function to check both email and phone at once
-const checkUserExists = async (userEmail, userPhone) => {
-  const user = await db.User.findOne({
-    where: {
-      [Op.or]: [{ email: userEmail }, { phone: userPhone }],
-    },
-    raw: true,
-  });
-  return user;
-};
-
-const checkPassword = (inputPassword, hashPassword) => {
-  return bcrypt.compareSync(inputPassword, hashPassword);
-};
-
 // const forgetPassword = async (user) => {
 //   console.log("TEST USER OUTPUT: ", user)
 
@@ -68,10 +41,44 @@ const checkPassword = (inputPassword, hashPassword) => {
 // }
 
 class AuthService {
+  // Hashes the password asynchronously
+  static hashUserPassword = async (userPassword) => {
+    try {
+      const salt = await bcrypt.genSalt(SALT_ROUNDS);
+      const hash = await bcrypt.hash(userPassword, salt);
+      return hash;
+    } catch (error) {
+      console.error("Error hashing password:", error);
+      throw error;
+    }
+  };
+
+  // Function to check both email and phone at once
+  static checkUserExists = async (userEmail, userPhone) => {
+    const user = await db.User.findOne({
+      where: {
+        [Op.or]: [
+          { email: userEmail },
+          { phone: userPhone },
+          { typeLogin: "local" },
+        ],
+      },
+      raw: true,
+    });
+    return user;
+  };
+
+  static checkPassword = (inputPassword, hashPassword) => {
+    return bcrypt.compareSync(inputPassword, hashPassword);
+  };
+
   static register = async (rawUserData) => {
     try {
       // Step 1: Check email/phone number already existed
-      let user = await checkUserExists(rawUserData.email, rawUserData.phone);
+      let user = await this.checkUserExists(
+        rawUserData.email,
+        rawUserData.phone
+      );
       if (user) {
         if (user.email === rawUserData.email) {
           return {
@@ -90,7 +97,7 @@ class AuthService {
       }
 
       //Step 2: hash user password
-      let hashPassword = await hashUserPassword(rawUserData.password);
+      let hashPassword = await this.hashUserPassword(rawUserData.password);
 
       //Step 3: create new user
       await db.User.create({
@@ -116,7 +123,7 @@ class AuthService {
 
   static login = async (rawUserData) => {
     try {
-      let user = await checkUserExists(
+      let user = await this.checkUserExists(
         rawUserData.valueLogin,
         rawUserData.valueLogin
       );
@@ -127,7 +134,7 @@ class AuthService {
         });
       }
 
-      let checkPw = checkPassword(rawUserData.password, user.password);
+      let checkPw = this.checkPassword(rawUserData.password, user.password);
       if (!checkPw) {
         throw new UnauthorizedResponse({
           EM: "Your password is incorrect",
@@ -214,6 +221,29 @@ class AuthService {
       });
     }
   };
+
+  static getUserByRefreshToken = async (refreshToken) => {
+    try {
+      let user = await db.User.findOne({
+        where: { refreshToken: refreshToken },
+      });
+
+      if (user) {
+        let roleWithPermission = await JWTService.getRoleWithPermission(user);
+        return {
+          roleWithPermission,
+          username: user.username,
+          email: user.email,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.log(">>> check error", error);
+      throw new ErrorResponse({
+        EM: "Error getting user by refresh token",
+      });
+    }
+  };
 }
 
-module.exports = AuthService;
+export default AuthService;
