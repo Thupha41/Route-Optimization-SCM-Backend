@@ -13,11 +13,11 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
 
       ProcurementPlan.belongsTo(models.User, { 
-        foreignKey: "plannerID",
+        foreignKey: "plannerId",
         as: "planner"
       })
       ProcurementPlan.belongsTo(models.User, { 
-        foreignKey: "managerID",
+        foreignKey: "managerId",
         as: "manager"
       })
     }
