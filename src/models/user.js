@@ -11,6 +11,14 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       User.belongsTo(models.Role, { foreignKey: "roleId" });
       User.hasMany(models.ResetPasswordToken, { foreignKey: "userID" });
+      User.hasMany(models.ProcurementPlan, {
+        foreignKey: "plannerId",
+        as: "planner_of_plan"
+      });
+      User.hasMany(models.ProcurementPlan, {
+        foreignKey: "managerId",
+        as: "manager_of_plan"
+      });
     }
   }
   User.init(

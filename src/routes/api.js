@@ -1,6 +1,7 @@
 import express from "express";
 import AuthController from "../controller/authController";
 import UserController from "../controller/userController";
+import ProcurementPlanController from "../controller/procurementPlanController"
 import RoleController from "../controller/roleController";
 import SupplierController from "../controller/supplierController";
 import PermissionController from "../controller/permissionController";
@@ -34,6 +35,12 @@ const initApiRoute = (app) => {
   router.post("/users/create", UserController.createUser);
   router.put("/users/update/:id", UserController.updateUser);
   router.delete("/users/delete/:id", UserController.deleteUser);
+
+  //procurement plan route
+  router.get("/procurement-plan/read", ProcurementPlanController.getListProcurementPlan);
+  router.post("/procurement-plan/create", ProcurementPlanController.createProcurementPlan);
+  router.put("/procurement-plan/update/:id", ProcurementPlanController.updateProcurementPlan);
+  router.delete("/procurement-plan/delete/:id", ProcurementPlanController.deleteProcurementPlan);
 
   //roles route
   router.get("/roles/read", RoleController.getListRoles);
