@@ -108,7 +108,7 @@ class AuthService {
         roleId: 4,
       });
       return {
-        EM: "A user create successfully!",
+        EM: "A user was created successfully!",
         EC: 1,
         DT: "",
       };
