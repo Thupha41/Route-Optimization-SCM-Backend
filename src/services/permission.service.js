@@ -256,30 +256,6 @@ class PermissionService {
     }
   };
 
-  // static assignPermissionToRole = async (data) => {
-  //   try {
-  //     await db.Permission_Role.destroy({
-  //       where: {
-  //         roleId: +data.roleId,
-  //       },
-  //     });
-  //     await db.Permission_Role.bulkCreate(data.rolePermissions);
-  //     return {
-  //       EM: "Assign permission to role successfully",
-  //       EC: 1,
-  //       DT: [],
-  //     };
-  //   } catch (error) {
-  //     console.log(error);
-  //     if (error instanceof NotFoundResponse) {
-  //       throw error;
-  //     }
-  //     throw new ErrorResponse({
-  //       EM: "Something wrong with assign permission to role service!",
-  //     });
-  //   }
-  // };
-
   static assignPermissionToRole = async (data) => {
     try {
       if (!data.roleId || !Array.isArray(data.rolePermissions)) {

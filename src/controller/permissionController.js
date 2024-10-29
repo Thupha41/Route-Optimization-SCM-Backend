@@ -112,28 +112,6 @@ const getPermissionByRole = async (req, res) => {
     }).send(res);
   }
 };
-
-// const assignPermissionToRole = async (req, res) => {
-//   try {
-//     const result = await PermissionService.assignPermissionToRole(
-//       req.body.data
-//     );
-//     return new OK({
-//       EC: result.EC,
-//       EM: result.EM,
-//       DT: result.DT,
-//     }).send(res);
-//   } catch (error) {
-//     console.log(error);
-//     if (error instanceof ErrorResponse) {
-//       return error.send(res);
-//     }
-//     return new ErrorResponse({
-//       EM: "Error message from server",
-//     }).send(res);
-//   }
-// };
-
 const assignPermissionToRole = async (req, res) => {
   try {
     if (

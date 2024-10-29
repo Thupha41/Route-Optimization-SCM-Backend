@@ -1,10 +1,11 @@
 import express from "express";
 import AuthController from "../controller/authController";
 import UserController from "../controller/userController";
-import ProcurementPlanController from "../controller/procurementPlanController"
+import ProcurementPlanController from "../controller/procurementPlanController";
 import RoleController from "../controller/roleController";
 import SupplierController from "../controller/supplierController";
 import PermissionController from "../controller/permissionController";
+import ParkingController from "../controller/parkingController";
 import { checkUserJWT, checkUserPermission } from "../middleware/JWTAction";
 const router = express.Router();
 // function checkUser(req, res, next) {
@@ -37,10 +38,22 @@ const initApiRoute = (app) => {
   router.delete("/users/delete/:id", UserController.deleteUser);
 
   //procurement plan route
-  router.get("/procurement-plan/read", ProcurementPlanController.getListProcurementPlan);
-  router.post("/procurement-plan/create", ProcurementPlanController.createProcurementPlan);
-  router.put("/procurement-plan/update/:id", ProcurementPlanController.updateProcurementPlan);
-  router.delete("/procurement-plan/delete/:id", ProcurementPlanController.deleteProcurementPlan);
+  router.get(
+    "/procurement-plan/read",
+    ProcurementPlanController.getListProcurementPlan
+  );
+  router.post(
+    "/procurement-plan/create",
+    ProcurementPlanController.createProcurementPlan
+  );
+  router.put(
+    "/procurement-plan/update/:id",
+    ProcurementPlanController.updateProcurementPlan
+  );
+  router.delete(
+    "/procurement-plan/delete/:id",
+    ProcurementPlanController.deleteProcurementPlan
+  );
 
   //roles route
   router.get("/roles/read", RoleController.getListRoles);
@@ -66,6 +79,13 @@ const initApiRoute = (app) => {
     "/permissions/delete/:id",
     PermissionController.deletePermission
   );
+
+  //parking route
+  router.get("/parkings/read", ParkingController.getListParking);
+  router.post("/parkings/create", ParkingController.createNewParking);
+  router.put("/parkings/update/:id", ParkingController.updateParkingArea);
+  router.delete("/parkings/delete/:id", ParkingController.deleteParkingArea);
+
   return app.use("/api/v1", router);
 };
 
