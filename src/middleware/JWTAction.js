@@ -8,6 +8,8 @@ const nonSecurePaths = [
   "/register",
   "/login",
   "/verify-services-jwt",
+  "/procurement-plan/search",
+  "/procurement-plan/filter",
 ];
 const createToken = (payload) => {
   let token = null;
@@ -33,7 +35,7 @@ const verifyToken = (token) => {
 };
 
 const checkUserJWT = async (req, res, next) => {
-  if (nonSecurePaths.includes(req.path)) return next();
+  if (nonSecurePaths.includes(req.path) || req.query.searchQuery) return next();
 
   //extract token from header
   const tokenFromHeader = extractToken(req);

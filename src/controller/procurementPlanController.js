@@ -86,9 +86,55 @@ const updateProcurementPlan = async (req, res) => {
   }
 };
 
+const searchProcurementPlan = async (req, res) => {
+  try {
+    const searchQuery = req.query.searchQuery || "";
+    const result = await ProcurementPlanService.search(searchQuery);
+    return new OK({
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT,
+    }).send(res);
+  } catch (error) {
+    console.log(error);
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
+  }
+};
+
+const filterPlans = async (req, res, next) => {
+  try {
+    const { page, limit } = req.query;
+    const result = await ProcurementPlanService.filter_by_query_options({
+      ...req.body,
+      limit: +limit,
+      page: +page,
+    });
+    new OK({
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT,
+    }).send(res);
+  } catch (error) {
+    console.log(error);
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
+  }
+};
+
 module.exports = {
   getListProcurementPlan,
   createProcurementPlan,
   deleteProcurementPlan,
   updateProcurementPlan,
+  searchProcurementPlan,
+  filterPlans,
 };

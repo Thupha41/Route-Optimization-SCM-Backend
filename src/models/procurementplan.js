@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class ProcurementPlan extends Model {
     /**
@@ -12,40 +10,44 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
 
-      ProcurementPlan.belongsTo(models.User, { 
+      ProcurementPlan.belongsTo(models.User, {
         foreignKey: "plannerId",
-        as: "planner"
-      })
-      ProcurementPlan.belongsTo(models.User, { 
+        as: "planner",
+      });
+      ProcurementPlan.belongsTo(models.User, {
         foreignKey: "managerId",
-        as: "manager"
-      })
+        as: "manager",
+      });
     }
-  };
-  ProcurementPlan.init({
-    plannerId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'User',
-        key: 'id'
-      }
+  }
+  ProcurementPlan.init(
+    {
+      plannerId: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: "User",
+          key: "id",
+        },
+      },
+      managerId: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: "User",
+          key: "id",
+        },
+      },
+      material: DataTypes.STRING,
+      deadline: DataTypes.DATE,
+      initialDate: DataTypes.DATE,
+      status: DataTypes.STRING,
+      priority: DataTypes.INTEGER,
+      demand: DataTypes.DOUBLE,
+      destination: DataTypes.STRING,
     },
-    managerId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'User',
-        key: 'id'
-      }
-    },
-    material: DataTypes.STRING,
-    deadline: DataTypes.DATE,
-    initialDate: DataTypes.DATE,
-    status: DataTypes.STRING,
-    priority: DataTypes.INTEGER,
-    demand: DataTypes.DOUBLE
-  }, {
-    sequelize,
-    modelName: 'ProcurementPlan',
-  });
+    {
+      sequelize,
+      modelName: "ProcurementPlan",
+    }
+  );
   return ProcurementPlan;
 };
