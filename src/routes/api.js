@@ -6,6 +6,7 @@ import RoleController from "../controller/roleController";
 import SupplierController from "../controller/supplierController";
 import PermissionController from "../controller/permissionController";
 import ParkingController from "../controller/parkingController";
+import VehicleController from "../controller/vehicleController";
 import { checkUserJWT, checkUserPermission } from "../middleware/JWTAction";
 const router = express.Router();
 // function checkUser(req, res, next) {
@@ -85,6 +86,12 @@ const initApiRoute = (app) => {
   router.post("/parkings/create", ParkingController.createNewParking);
   router.put("/parkings/update/:id", ParkingController.updateParkingArea);
   router.delete("/parkings/delete/:id", ParkingController.deleteParkingArea);
+
+  //vehicle route
+  router.get("/vehicle/read", VehicleController.getListVehicle);
+  router.post("/vehicle/create", VehicleController.createVehicle);
+  router.put("/vehicle/update/:id", VehicleController.updateVehicle);
+  router.delete("/vehicle/delete/:id", VehicleController.deleteVehicle);
 
   return app.use("/api/v1", router);
 };
