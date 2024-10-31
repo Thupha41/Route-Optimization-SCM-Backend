@@ -8,19 +8,19 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      vehicleName: {
+      vehicle_name: {
         type: Sequelize.STRING
       },
-      registeredNum: {
+      registered_num: {
         type: Sequelize.STRING
       },
       capacity: {
         type: Sequelize.INTEGER
       },
-      kilometerDriven: {
+      kilometer_driven: {
         type: Sequelize.DOUBLE
       },
-      parkingId: {
+      parking_id: {
         type: Sequelize.INTEGER
       },
       createdAt: {

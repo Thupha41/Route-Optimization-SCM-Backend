@@ -12,17 +12,17 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Vehicle.belongsTo(models.Parking, {
-        foreignKey: "parkingId",
+        foreignKey: "parking_id",
         as: "parking",
       })
     }
   };
   Vehicle.init({
-    vehicleName: DataTypes.STRING,
-    registeredNum: DataTypes.STRING,
+    vehicle_name: DataTypes.STRING,
+    registered_num: DataTypes.STRING,
     capacity: DataTypes.INTEGER,
-    kilometerDriven: DataTypes.DOUBLE,
-    parkingId: {
+    kilometer_driven: DataTypes.DOUBLE,
+    parking_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },

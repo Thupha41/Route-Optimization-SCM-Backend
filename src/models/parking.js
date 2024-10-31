@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Parking.hasMany(models.Vehicle, {
-        foreignKey: "parkingId",
+        foreignKey: "parking_id",
         as: "vehicles",
       });
     }
@@ -18,6 +18,22 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: DataTypes.STRING,
       address: DataTypes.STRING,
+      formatted_address: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      latitude: {
+        type: DataTypes.DOUBLE,
+        allowNull: true,
+      },
+      longtitude: {
+        type: DataTypes.DOUBLE,
+        allowNull: true,
+      },
+      place_id: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     },
     {
       sequelize: sequelize,
