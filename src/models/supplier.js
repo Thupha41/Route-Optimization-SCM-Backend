@@ -13,21 +13,43 @@ module.exports = (sequelize, DataTypes) => {
   }
   Supplier.init(
     {
-      company_code: DataTypes.INTEGER,
-      company_name: DataTypes.STRING,
-      phone_number: DataTypes.STRING,
-      representative_name: DataTypes.STRING,
-      address: DataTypes.STRING,
-      hasDeliveryTeam: DataTypes.BOOLEAN,
-      capacity: DataTypes.DOUBLE,
-      description: DataTypes.STRING,
+      // company_code: DataTypes.INTEGER,
+      
+      CompanyName: DataTypes.STRING,
+      Address: DataTypes.STRING,
+      phone: DataTypes.STRING,
+      representative: DataTypes.STRING,
       email: DataTypes.STRING,
-      market: DataTypes.STRING,
-      scale: DataTypes.STRING,
-      product_service: DataTypes.STRING,
+      description: DataTypes.STRING,
       sector: DataTypes.STRING,
-      year: DataTypes.STRING,
-      tax_code: DataTypes.STRING,
+      ProductAndService: DataTypes.STRING,
+      Market: DataTypes.STRING,
+      Masothue: DataTypes.STRING,
+      Year: DataTypes.STRING,
+      Scale: DataTypes.STRING,
+      Capacity: DataTypes.DOUBLE,
+      Price: {
+        type: DataTypes.DOUBLE,
+        allowNull: true,
+      },
+      formatted_address: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      latitude: {
+        type: DataTypes.DOUBLE,
+        allowNull: true,
+      },
+      longtitude: {
+        type: DataTypes.DOUBLE,
+        allowNull: true,
+      },
+      place_id: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      
+      // hasDeliveryTeam: DataTypes.BOOLEAN,
     },
     {
       sequelize,
