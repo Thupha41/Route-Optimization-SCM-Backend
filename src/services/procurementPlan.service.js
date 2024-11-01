@@ -86,10 +86,7 @@ class ProcurementPlanService {
       });
 
       if (procurementPlan) {
-        await db.ProcurementPlan.update(
-          {
-            data,
-          },
+        await db.ProcurementPlan.update(data,
           {
             where: { id: data.id },
           }
