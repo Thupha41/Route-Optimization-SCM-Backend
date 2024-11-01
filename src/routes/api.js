@@ -43,9 +43,17 @@ const initApiRoute = (app) => {
     "/procurement-plan/read",
     ProcurementPlanController.getListProcurementPlan
   );
+  router.get(
+    "/procurement-plan/search",
+    ProcurementPlanController.searchProcurementPlan
+  );
   router.post(
     "/procurement-plan/create",
     ProcurementPlanController.createProcurementPlan
+  );
+  router.post(
+    "/procurement-plan/filter",
+    ProcurementPlanController.filterPlans
   );
   router.put(
     "/procurement-plan/update/:id",
