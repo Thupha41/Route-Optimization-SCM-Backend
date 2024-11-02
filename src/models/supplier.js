@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
   Supplier.init(
     {
       // company_code: DataTypes.INTEGER,
-      
+
       CompanyName: DataTypes.STRING,
       Address: DataTypes.STRING,
       phone: DataTypes.STRING,
@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DOUBLE,
         allowNull: true,
       },
-      longtitude: {
+      longitude: {
         type: DataTypes.DOUBLE,
         allowNull: true,
       },
@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      
+
       // hasDeliveryTeam: DataTypes.BOOLEAN,
     },
     {
