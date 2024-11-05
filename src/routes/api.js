@@ -8,6 +8,7 @@ import PermissionController from "../controller/permissionController";
 import ParkingController from "../controller/parkingController";
 import VehicleController from "../controller/vehicleController";
 import { checkUserJWT, checkUserPermission } from "../middleware/JWTAction";
+import { auditLogMiddleware } from "../middleware/auditLogging";
 const router = express.Router();
 // function checkUser(req, res, next) {
 //   const nonSecurePaths = ['/register', '/login'];
@@ -41,18 +42,22 @@ const initApiRoute = (app) => {
   //procurement plan route
   router.get(
     "/procurement-plan/read",
+    auditLogMiddleware,
     ProcurementPlanController.getListProcurementPlan
   );
   router.get(
     "/procurement-plan/search",
+    auditLogMiddleware,
     ProcurementPlanController.searchProcurementPlan
   );
   router.post(
     "/procurement-plan/create",
+    auditLogMiddleware,
     ProcurementPlanController.createProcurementPlan
   );
   router.post(
     "/procurement-plan/filter",
+    auditLogMiddleware,
     ProcurementPlanController.filterPlans
   );
   router.put(
