@@ -57,9 +57,10 @@ class AuthService {
   static checkUserExists = async (userEmail, userPhone) => {
     const user = await db.User.findOne({
       where: {
-        [Op.or]: [
-          { email: userEmail },
-          { phone: userPhone },
+        [Op.and]: [
+          {
+            [Op.or]: [{ email: userEmail }, { phone: userPhone }],
+          },
           { typeLogin: "local" },
         ],
       },
@@ -143,6 +144,7 @@ class AuthService {
       const code = uuidv4();
       let roleWithPermission = await JWTService.getRoleWithPermission(user);
       let payload = {
+        user_id: user.id,
         roleWithPermission,
         username: user.username,
         email: user.email,
@@ -154,6 +156,7 @@ class AuthService {
         EM: "Login successfully",
         EC: 1,
         DT: {
+          user_id: user.id,
           access_token: token,
           roleWithPermission,
           username: user.username,
@@ -227,10 +230,10 @@ class AuthService {
       let user = await db.User.findOne({
         where: { refreshToken: refreshToken },
       });
-
       if (user) {
         let roleWithPermission = await JWTService.getRoleWithPermission(user);
         return {
+          user_id: user.id,
           roleWithPermission,
           username: user.username,
           email: user.email,

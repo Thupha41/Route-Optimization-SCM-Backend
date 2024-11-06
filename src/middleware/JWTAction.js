@@ -44,6 +44,7 @@ const checkUserJWT = async (req, res, next) => {
     let access_token =
       cookies && cookies.access_token ? cookies.access_token : tokenFromHeader;
     let decoded = verifyToken(access_token);
+    console.log(">>> check decoded", decoded);
     if (decoded && decoded !== "Token expired error") {
       decoded.access_token = access_token;
       decoded.refresh_token = cookies.refresh_token;
@@ -64,7 +65,7 @@ const checkUserJWT = async (req, res, next) => {
           });
           res.cookie("access_token", newAccessToken, {
             httpOnly: true,
-            maxAge: 15 * 60 * 1000,
+            maxAge: 60 * 60 * 1000,
           });
         }
         return res.status(405).json({
@@ -156,6 +157,7 @@ const handleRefreshToken = async (refreshToken) => {
   let user = await AuthService.getUserByRefreshToken(refreshToken);
   if (user) {
     let payloadAccessToken = {
+      user_id: user.user_id,
       roleWithPermission: user.roleWithPermission,
       username: user.username,
       email: user.email,

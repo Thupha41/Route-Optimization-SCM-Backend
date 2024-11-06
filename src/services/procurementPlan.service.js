@@ -3,6 +3,7 @@ const { NotFoundResponse, ErrorResponse } = require("../core/error.response");
 import { Op } from "sequelize";
 import { getInfoData, removeNull, formatKeys } from "../utils";
 import moment from "moment";
+import { generateUUID } from "../helpers";
 class ProcurementPlanService {
   static getProcurementPlan = async () => {
     try {
@@ -60,7 +61,10 @@ class ProcurementPlanService {
 
   static create = async (data) => {
     try {
-      await db.ProcurementPlan.create(data);
+      await db.ProcurementPlan.create({
+        ...data,
+        id: generateUUID(),
+      });
 
       return {
         EM: "Procurement plan created successfully.",
@@ -86,11 +90,9 @@ class ProcurementPlanService {
       });
 
       if (procurementPlan) {
-        await db.ProcurementPlan.update(data,
-          {
-            where: { id: data.id },
-          }
-        );
+        await db.ProcurementPlan.update(data, {
+          where: { id: data.id },
+        });
 
         return {
           EM: "Update procurement plan successfully",
@@ -215,20 +217,20 @@ class ProcurementPlanService {
     // Handling initialDate custom range from and to
     if (filters.initialFrom && filters.initialTo) {
       initialDateFilter = {
-        [Op.gte]: moment(filters.initialFrom, "DD/MM/YYYY")
+        [Op.gte]: moment(filters.initialFrom, "YYYY/MM/DD")
           .startOf("day")
           .toDate(),
-        [Op.lte]: moment(filters.initialTo, "DD/MM/YYYY").endOf("day").toDate(),
+        [Op.lte]: moment(filters.initialTo, "YYYY/MM/DD").endOf("day").toDate(),
       };
     }
 
     // Handling deadline custom range from and to
     if (filters.deadlineFrom && filters.deadlineTo) {
       deadlineFilter = {
-        [Op.gte]: moment(filters.deadlineFrom, "DD/MM/YYYY")
+        [Op.gte]: moment(filters.deadlineFrom, "YYYY/MM/DD")
           .startOf("day")
           .toDate(),
-        [Op.lte]: moment(filters.deadlineTo, "DD/MM/YYYY")
+        [Op.lte]: moment(filters.deadlineTo, "YYYY/MM/DD")
           .endOf("day")
           .toDate(),
       };
@@ -299,6 +301,88 @@ class ProcurementPlanService {
       }
       throw new ErrorResponse({
         EM: "Something's wrong with filtering a procurement plan!",
+      });
+    }
+  };
+
+  static bulkDelete = async (ids) => {
+    try {
+      const result = await db.sequelize.transaction(async (t) => {
+        const deletedCount = await db.ProcurementPlan.destroy({
+          where: {
+            id: {
+              [Op.in]: ids,
+            },
+          },
+          transaction: t,
+        });
+
+        if (deletedCount === 0) {
+          throw new NotFoundResponse({
+            EM: "No procurement plans found to delete",
+          });
+        }
+
+        return deletedCount;
+      });
+
+      return {
+        EM: `Successfully deleted ${result} procurement plan(s)`,
+        EC: 1,
+        DT: {
+          deletedCount: result,
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
+        EM: "Error deleting procurement plans",
+      });
+    }
+  };
+
+  static bulkUpdate = async (plans) => {
+    try {
+      const result = await db.sequelize.transaction(async (t) => {
+        const updatePromises = plans.map(async (plan) => {
+          const { id, ...updateData } = plan;
+
+          // Check plan exist
+          const existingPlan = await db.ProcurementPlan.findByPk(id);
+          if (!existingPlan) {
+            throw new NotFoundResponse({
+              EM: `Procurement plan with ID ${id} not found`,
+            });
+          }
+
+          // Update the plan
+          return db.ProcurementPlan.update(updateData, {
+            where: { id },
+            transaction: t,
+          });
+        });
+
+        const results = await Promise.all(updatePromises);
+        return results.length;
+      });
+
+      return {
+        EM: `Successfully updated ${result} procurement plan(s)`,
+        EC: 1,
+        DT: {
+          updatedCount: result,
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      if (error instanceof ErrorResponse) {
+        throw error;
+      }
+      throw new ErrorResponse({
+        EM: "Error updating procurement plans",
       });
     }
   };

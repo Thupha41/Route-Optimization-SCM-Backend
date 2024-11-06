@@ -130,6 +130,64 @@ const filterPlans = async (req, res, next) => {
   }
 };
 
+const bulkDeleteProcurementPlans = async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    const result = await ProcurementPlanService.bulkDelete(ids);
+
+    return new OK({
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT,
+    }).send(res);
+  } catch (error) {
+    console.log(error);
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
+  }
+};
+
+const bulkUpdateProcurementPlans = async (req, res) => {
+  try {
+    const { plans } = req.body;
+
+    // Validate input
+    if (!Array.isArray(plans) || plans.length === 0) {
+      return new ErrorResponse({
+        EM: "Please provide an array of procurement plans to update",
+      }).send(res);
+    }
+
+    // Validate that each plan has an id
+    if (!plans.every((plan) => plan.id)) {
+      return new ErrorResponse({
+        EM: "Each plan must have an id",
+      }).send(res);
+    }
+
+    const result = await ProcurementPlanService.bulkUpdate(plans);
+
+    return new OK({
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT,
+    }).send(res);
+  } catch (error) {
+    console.log(error);
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
+  }
+};
+
 module.exports = {
   getListProcurementPlan,
   createProcurementPlan,
@@ -137,4 +195,6 @@ module.exports = {
   updateProcurementPlan,
   searchProcurementPlan,
   filterPlans,
+  bulkDeleteProcurementPlans,
+  bulkUpdateProcurementPlans,
 };
