@@ -22,6 +22,12 @@ module.exports = (sequelize, DataTypes) => {
   }
   ProcurementPlan.init(
     {
+      id: {
+        type: DataTypes.STRING(36),
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
       plannerId: {
         type: DataTypes.INTEGER,
         references: {

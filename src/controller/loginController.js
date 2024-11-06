@@ -22,7 +22,6 @@ const getLoginPage = (req, res) => {
 const verifySSOToken = async (req, res) => {
   try {
     const { ssoToken } = req.body;
-
     if (req.user && req.user.code && req.user.code === ssoToken) {
       const refreshToken = uuidv4();
 
@@ -30,6 +29,7 @@ const verifySSOToken = async (req, res) => {
       await AuthService.updateRefreshToken(req.user.email, refreshToken);
 
       let payload = {
+        user_id: req.user.user_id,
         roleWithPermission: req.user.roleWithPermission,
         username: req.user.username,
         email: req.user.email,
@@ -44,10 +44,11 @@ const verifySSOToken = async (req, res) => {
       });
       res.cookie("access_token", token, {
         httpOnly: true,
-        maxAge: 15 * 60 * 1000,
+        maxAge: 60 * 60 * 1000,
       });
 
       const resData = {
+        user_id: req.user.user_id,
         access_token: token,
         refresh_token: refreshToken,
         email: req.user.email,
@@ -68,7 +69,7 @@ const verifySSOToken = async (req, res) => {
       throw new UnauthorizedResponse({
         EM: "Not match sso token",
         DT: "",
-      }).send(res);
+      });
     }
   } catch (error) {
     console.log(error);

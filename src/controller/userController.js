@@ -96,6 +96,7 @@ const getUserAccount = (req, res) => {
   return new OK({
     EM: "get user detail successfully",
     DT: {
+      user_id: req.user.user_id,
       access_token: req.user.access_token,
       refresh_token: req.user.refresh_token,
       username: req.user.username,

@@ -63,6 +63,14 @@ const initApiRoute = (app) => {
     "/procurement-plan/delete/:id",
     ProcurementPlanController.deleteProcurementPlan
   );
+  router.delete(
+    "/procurement-plan/bulk-delete",
+    ProcurementPlanController.bulkDeleteProcurementPlans
+  );
+  router.put(
+    "/procurement-plan/bulk-update",
+    ProcurementPlanController.bulkUpdateProcurementPlans
+  );
 
   //roles route
   router.get("/roles/read", RoleController.getListRoles);
@@ -87,6 +95,11 @@ const initApiRoute = (app) => {
   router.delete(
     "/permissions/delete/:id",
     PermissionController.deletePermission
+  );
+
+  router.get(
+    "/roles/:id/permissions",
+    PermissionController.getPermissionByRole
   );
 
   //parking route

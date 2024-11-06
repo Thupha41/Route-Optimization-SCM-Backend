@@ -4,15 +4,20 @@ import AuthService from "../services/auth.service";
 const configPassport = () => {
   passport.use(
     new LocalStrategy({}, async (username, password, done) => {
-      const rawData = {
-        valueLogin: username,
-        password: password,
-      };
-      const user = await AuthService.login(rawData);
-      if (user && +user.EC === 1) {
-        return done(null, user.DT);
-      } else {
-        return done(null, false, { message: user.EM });
+      try {
+        const rawData = {
+          valueLogin: username,
+          password: password,
+        };
+        const user = await AuthService.login(rawData);
+        if (user && +user.EC === 1) {
+          return done(null, user.DT);
+        } else {
+          return done(null, false, { message: user.EM });
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        return done(error);
       }
     })
   );
