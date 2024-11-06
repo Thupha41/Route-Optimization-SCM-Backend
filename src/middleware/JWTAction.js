@@ -48,7 +48,7 @@ const checkUserJWT = async (req, res, next) => {
       decoded.access_token = access_token;
       decoded.refresh_token = cookies.refresh_token;
       req.user = decoded;
-      console.log(">>> check user", req.user);
+      // console.log(">>> check user", req.user);
       next();
     } else if (decoded && decoded === "Token expired error") {
       // handle refresh token
