@@ -14,32 +14,6 @@ require("dotenv").config();
 // Configurable salt rounds
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10) || 10;
 
-// const forgetPassword = async (user) => {
-//   console.log("TEST USER OUTPUT: ", user)
-
-//   const token = crypto.randomBytes(20).toString("hex");
-//     const resetToken = crypto
-//       .createHash("sha256")
-//       .update(token)
-//       .digest("hex");
-//     await db.update_forgot_password_token(user[0].id, resetToken);
-
-//     const mailOption = {
-//       email: user.email,
-//       subject: "Forgot Password Link",
-//       message: mailTemplate(
-//         "We have received a request to reset your password. Please reset your password using the link below.",
-//         `${process.env.FRONTEND_URL}/resetPassword?id=${user[0].id}&token=${resetToken}`,
-//         "Reset Password"
-//       ),
-//     };
-//     await sendEmail(mailOption);
-//     res.json({
-//       success: true,
-//       message: "A password reset link has been sent to your email.",
-//     });
-// }
-
 class AuthService {
   // Hashes the password asynchronously
   static hashUserPassword = async (userPassword) => {
