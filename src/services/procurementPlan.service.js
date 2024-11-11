@@ -244,14 +244,29 @@ class ProcurementPlanService {
     });
   };
 
-  static filter_by_query_options = async ({ filters, limit, page }) => {
+  static filter_by_query_options = async ({
+    filters,
+    limit,
+    page,
+    sort = null,
+  }) => {
     try {
       limit = Number(limit) > 0 ? Number(limit) : 10;
       page = Number(page) > 0 ? Number(page) : 1;
-
       const offset = (page - 1) * limit;
-
       const new_filters = this.__formatFiltersOptions(filters);
+
+      let orderClauses = [];
+
+      if (sort && Array.isArray(sort) && sort.length === 2) {
+        const [field, direction] = sort;
+        const sortDirection =
+          direction?.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+        if (field === "priority") {
+          orderClauses = [["priority", sortDirection]];
+        }
+      }
 
       const { count, rows } = await db.ProcurementPlan.findAndCountAll({
         where: {
@@ -269,6 +284,7 @@ class ProcurementPlanService {
             required: false,
           },
         ],
+        ...(orderClauses.length > 0 ? { order: orderClauses } : {}),
         limit: limit,
         offset: offset,
         raw: true,

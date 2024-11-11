@@ -47,7 +47,6 @@ const initApiRoute = (app) => {
   );
   router.get(
     "/procurement-plan/search",
-    auditLogMiddleware,
     ProcurementPlanController.searchProcurementPlan
   );
   router.post(

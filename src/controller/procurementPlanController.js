@@ -109,11 +109,13 @@ const searchProcurementPlan = async (req, res) => {
 const filterPlans = async (req, res, next) => {
   try {
     const { page, limit } = req.query;
+
     const result = await ProcurementPlanService.filter_by_query_options({
       ...req.body,
       limit: +limit,
       page: +page,
     });
+
     new OK({
       EM: result.EM,
       EC: result.EC,
