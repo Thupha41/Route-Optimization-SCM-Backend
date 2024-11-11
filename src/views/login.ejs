@@ -45,18 +45,105 @@
     .none-error-message {
       display: none;
     }
+    .form-control.is-invalid {
+      border-color: #dc3545;
+      background-image: none;
+    }
+
+    .alert {
+      transition: all 0.3s ease-in-out;
+    }
+
+    .none-error-message {
+      display: none;
+      opacity: 0;
+    }
+
+    /* Add password toggle button styles */
+    #togglePassword {
+      cursor: pointer;
+    }
+
+    #togglePassword:hover {
+      background-color: #e9ecef;
+    }
+
+    /* Add shake animation for errors */
+    @keyframes shake {
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+      10%,
+      30%,
+      50%,
+      70%,
+      90% {
+        transform: translateX(-5px);
+      }
+      20%,
+      40%,
+      60%,
+      80% {
+        transform: translateX(5px);
+      }
+    }
+
+    .shake {
+      animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
   </style>
 
   <script>
     $(document).ready(function () {
+      function showError(message) {
+        $("#error-message")
+          .removeClass("none-error-message")
+          .removeClass("alert-success")
+          .addClass("alert-danger")
+          .html(message);
+      }
+
+      function validateForm() {
+        const email = $("#username").val().trim();
+        const password = $("#password").val().trim();
+
+        // Clear previous error
+        $("#error-message").addClass("none-error-message");
+
+        // Validate email
+        if (!email) {
+          showError("Please enter your email address");
+          $("#username").focus();
+          return false;
+        }
+
+        // Basic email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showError("Please enter a valid email address");
+          $("#username").focus();
+          return false;
+        }
+
+        // Validate password
+        if (!password) {
+          showError("Please enter your password");
+          $("#password").focus();
+          return false;
+        }
+
+        return true;
+      }
+
       $("#btn-login").on("click", function () {
-        // const redirectURL = $('#redirectURL').val()
-        $("#error-message").empty();
+        if (!validateForm()) return;
+
         $.ajax({
           type: "POST",
           url: `${window.location.origin}/login`,
           data: {
-            username: $("#username").val(),
+            username: $("#username").val().trim(),
             password: $("#password").val(),
             redirectURL: $("#redirectURL").val(),
           },
@@ -70,12 +157,24 @@
           },
           error: function (request, status, error) {
             $("#password").val("");
-            $("#error-message").removeClass("none-error-message");
-            $("#error-message").append(request.responseText);
-            console.log(request.responseText);
+            showError(request.responseText || "Invalid email or password");
           },
         });
       });
+
+      // Handle input changes to clear error message
+      $("#username, #password").on("input", function () {
+        $("#error-message").addClass("none-error-message");
+      });
+
+      // Handle Enter key for both email and password fields
+      $("#username, #password").on("keypress", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          $("#btn-login").click();
+        }
+      });
+
       $(".btn-back").on("click", function () {
         window.location.href = "<%= process.env.REACT_PATH_SSO %>";
       });
@@ -84,11 +183,19 @@
         localStorage.setItem("clientURL", $("#redirectURL").val());
         window.location.href = "/auth/google";
       });
-      const password = document.getElementById("password");
-      password.addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          document.getElementById("btn-login").click();
+    });
+
+    $(document).ready(function () {
+      $("#togglePassword").click(function () {
+        const passwordInput = $("#password");
+        const icon = $(this).find("i");
+
+        if (passwordInput.attr("type") === "password") {
+          passwordInput.attr("type", "text");
+          icon.removeClass("bi-eye").addClass("bi-eye-slash");
+        } else {
+          passwordInput.attr("type", "password");
+          icon.removeClass("bi-eye-slash").addClass("bi-eye");
         }
       });
     });
@@ -115,32 +222,49 @@
                 Login to access your EffiRoute account
               </p>
 
-              <form>
+              <form id="loginForm" novalidate>
                 <div
                   class="alert alert-danger my-1 none-error-message"
                   role="alert"
                   id="error-message"
                 ></div>
                 <div class="mb-3">
-                  <label htmlFor="email" class="form-label">Email</label>
+                  <label for="username" class="form-label">Email</label>
                   <input
-                    type="text"
+                    type="email"
                     class="form-control"
                     id="username"
                     name="username"
                     placeholder="Please enter your email address"
+                    aria-label="Email address"
+                    autocomplete="email"
+                    required
                   />
                 </div>
 
                 <div class="mb-3">
-                  <label htmlFor="password" class="form-label">Password</label>
-                  <input
-                    type="password"
-                    class="form-control"
-                    id="password"
-                    name="password"
-                    placeholder="Please enter your password"
-                  />
+                  <label for="password" class="form-label">Password</label>
+                  <div class="input-group">
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="password"
+                      name="password"
+                      placeholder="Please enter your password"
+                      aria-label="Password"
+                      autocomplete="current-password"
+                      required
+                      minlength="6"
+                    />
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      id="togglePassword"
+                      aria-label="Toggle password visibility"
+                    >
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
                 </div>
 
                 <div

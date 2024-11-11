@@ -33,82 +33,138 @@
   </head>
   <script>
     $(document).ready(function() {
-      $('#btnVerify').on('click', function() {
-        let code = $('#code').val();
-        $('#btnVerify').prop('disabled', true).text('Verifying...');
-        
+      function showAlert(message, type = 'danger') {
+        const alertDiv = $('#alertMessage');
+        alertDiv
+          .removeClass()
+          .addClass(`alert alert-${type}`)
+          .html(message)
+          .fadeIn();
+
+        setTimeout(() => {
+          alertDiv.fadeOut();
+        }, 3000);
+      }
+
+      function validateCode(code) {
         if (!code) {
-          setTimeout(() => {
-            alert('Please enter the code');
-            $('#btnVerify').prop('disabled', false).text("Verify");
-          }, 1000);
+          return { isValid: false, message: 'Please enter the verification code' };
+        }
+        if (!/^\d{6}$/.test(code)) {
+          return { isValid: false, message: 'Please enter a valid 6-digit code' };
+        }
+        return { isValid: true };
+      }
+
+      // Real-time code validation
+      $('#code').on('input', function() {
+        const code = $(this).val().trim();
+        const codeValidation = validateCode(code);
+        
+        if (code && !codeValidation.isValid) {
+          $(this)
+            .addClass('is-invalid')
+            .removeClass('is-valid');
+          $('#codeFeedback')
+            .text(codeValidation.message)
+            .show();
+        } else if (code) {
+          $(this)
+            .removeClass('is-invalid')
+            .addClass('is-valid');
+          $('#codeFeedback').hide();
+        } else {
+          $(this)
+            .removeClass('is-invalid is-valid');
+          $('#codeFeedback').hide();
+        }
+      });
+
+      $('#btnVerify').on('click', function() {
+        const code = $('#code').val().trim();
+        const codeValidation = validateCode(code);
+
+        if (!codeValidation.isValid) {
+          showAlert(codeValidation.message);
+          $('#code').focus();
           return;
         }
+
+        const $button = $(this);
+        $button
+          .prop('disabled', true)
+          .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Verifying...');
 
         $.ajax({
           url: `${window.location.origin}/verify-forgot-code`,
           method: 'POST',
           data: { code: code },
           success: function(response) {
-            setTimeout(() => {
-              if (response && response.EC === 1) {
-                alert(response.EM);
+            if (response && response.EC === 1) {
+              showAlert(response.EM, 'success');
+              setTimeout(() => {
                 window.location.href = '/reset-password';
-              } else {
-                alert(response.EM);
-              }
-            }, 1000);
+              }, 1500);
+            } else {
+              showAlert(response.EM);
+            }
           },
-          error: function(request, status, error) {
-            setTimeout(() => {
-              let errorEM = request?.responseText ?? '';
-              if (errorEM) {
-                let parsedError = JSON.parse(errorEM);
-                alert(parsedError.EM);
-              }
-            }, 1000);
+          error: function(request) {
+            try {
+              const errorResponse = JSON.parse(request.responseText);
+              showAlert(errorResponse.EM || 'Verification failed');
+            } catch (e) {
+              showAlert('An unexpected error occurred');
+            }
           },
           complete: function() {
-            setTimeout(() => {
-              $('#btnVerify').prop('disabled', false).text("Verify");
-            }, 1000);
+            $button
+              .prop('disabled', false)
+              .text('Verify');
           }
         });
       });
 
       $('#resendCode').on('click', function(e) {
         e.preventDefault();
-
-        // Disable the button to prevent multiple clicks
-        $('#resendCode').prop('disabled', true).text('Resending...');
+        
+        const $button = $(this);
+        $button
+          .prop('disabled', true)
+          .html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Resending...');
 
         $.ajax({
           url: `${window.location.origin}/resend-code`,
           method: 'POST',
           success: function(response) {
-            setTimeout(() => {
-              if (response && response.EC === 1) {
-                alert('Code resent successfully');
-              } else {
-                alert(response.EM);
-              }
-            }, 1000);
+            if (response && response.EC === 1) {
+              showAlert('Code resent successfully', 'success');
+            } else {
+              showAlert(response.EM);
+            }
           },
-          error: function(request, status, error) {
-            setTimeout(() => {
-              let errorEM = request?.responseText ?? '';
-              if (errorEM) {
-                let parsedError = JSON.parse(errorEM);
-                alert(parsedError.EM);
-              }
-            }, 1000);
+          error: function(request) {
+            try {
+              const errorResponse = JSON.parse(request.responseText);
+              showAlert(errorResponse.EM || 'Failed to resend code');
+            } catch (e) {
+              showAlert('An unexpected error occurred');
+            }
           },
           complete: function() {
-            setTimeout(() => {
-              $('#resendCode').prop('disabled', false).text("Resend");
-            }, 1000);
+            $button
+              .prop('disabled', false)
+              .text('Resend');
           }
         });
+      });
+
+      // Handle Enter key
+      $('#code').keypress(function(e) {
+        if (e.which === 13) {
+          e.preventDefault();
+          $('#btnVerify').click();
+        }
       });
     });
   </script>

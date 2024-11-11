@@ -1,0 +1,48 @@
+services:
+  db-mysql:
+    image: mysql:5.7.40
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: "mysql -uroot -p$$MYSQL_ROOT_PASSWORD  -e 'SHOW databases'"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    expose:
+      - 3306
+    networks:
+      - scm-network
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - db-mysql
+    environment:
+      - DB_PORT=3306
+      - DB_HOST=db-mysql
+    ports:
+      - ${PORT}:${PORT}
+    env_file:
+      - .env
+    volumes:
+      - ./src:/scm-api/backend/src
+      - ./package.json:/scm-api/backend/package.json
+    networks:
+      - scm-network
+volumes:
+  mysql_data:
+
+networks:
+  scm-network:
+    driver: bridge
+#docker compose -p scm-nodejs-mysql -f docker-compose.yml up -d
