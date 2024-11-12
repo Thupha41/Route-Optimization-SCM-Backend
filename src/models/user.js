@@ -13,11 +13,11 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.ResetPasswordToken, { foreignKey: "userID" });
       User.hasMany(models.ProcurementPlan, {
         foreignKey: "plannerId",
-        as: "planner_of_plan"
+        as: "planner_of_plan",
       });
       User.hasMany(models.ProcurementPlan, {
         foreignKey: "managerId",
-        as: "manager_of_plan"
+        as: "manager_of_plan",
       });
     }
   }
@@ -26,10 +26,6 @@ module.exports = (sequelize, DataTypes) => {
       email: DataTypes.STRING,
       password: DataTypes.STRING,
       username: DataTypes.STRING,
-      fullname: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
       address: DataTypes.STRING,
       sex: DataTypes.STRING,
       phone: DataTypes.STRING,

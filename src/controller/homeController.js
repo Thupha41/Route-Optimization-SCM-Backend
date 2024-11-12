@@ -6,12 +6,25 @@ import {
   getUserById,
 } from "../services/userService";
 
-const getHomePage = (req, res) => {
+const getHomePage = async (req, res) => {
   return res.render("home.ejs");
 };
 const getUserPage = async (req, res) => {
-  let users = await getListUser();
-  return res.render("user.ejs", { listUser: users });
+  try {
+    const listUser = (await getListUser()) || [];
+    return res.render("user.ejs", {
+      listUser: listUser,
+      error: req.flash("error"),
+      success: req.flash("success"),
+    });
+  } catch (error) {
+    console.log(">>> error: ", error);
+    return res.render("user.ejs", {
+      listUser: [],
+      error: "Error fetching users",
+      success: "",
+    });
+  }
 };
 const postCreateUser = async (req, res) => {
   const { email, password, username } = req.body;

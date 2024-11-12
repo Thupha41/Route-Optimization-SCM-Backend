@@ -56,23 +56,26 @@ const initApiRoute = (app) => {
   );
   router.post(
     "/procurement-plan/filter",
-    auditLogMiddleware,
     ProcurementPlanController.filterPlans
   );
   router.put(
     "/procurement-plan/update/:id",
+    auditLogMiddleware,
     ProcurementPlanController.updateProcurementPlan
   );
   router.delete(
     "/procurement-plan/delete/:id",
+    auditLogMiddleware,
     ProcurementPlanController.deleteProcurementPlan
   );
   router.delete(
     "/procurement-plan/bulk-delete",
+    auditLogMiddleware,
     ProcurementPlanController.bulkDeleteProcurementPlans
   );
   router.put(
     "/procurement-plan/bulk-update",
+    auditLogMiddleware,
     ProcurementPlanController.bulkUpdateProcurementPlans
   );
 

@@ -21,7 +21,10 @@ class ResetPasswordService {
   static markTokenAsConsumed = async (tokenId) => {
     try {
       await db.ResetPasswordToken.update(
-        { consumed: true },
+        {
+          consumed: true,
+          verifyToken: null, // Clear the verifyToken
+        },
         { where: { id: tokenId } }
       );
     } catch (error) {
@@ -44,7 +47,6 @@ class ResetPasswordService {
       });
 
       if (existingToken) {
-        // Update the existing token with a new code and reset the expiration date
         await db.ResetPasswordToken.update(
           {
             verifyToken: verifyCode,
@@ -86,7 +88,11 @@ class ResetPasswordService {
   static isVerifyCode = async (code) => {
     try {
       const resetToken = await db.ResetPasswordToken.findOne({
-        where: { verifyToken: code },
+        where: {
+          verifyToken: code,
+          consumed: false,
+          expired: false,
+        },
       });
       return resetToken;
     } catch (error) {
@@ -99,7 +105,6 @@ class ResetPasswordService {
 
   static resetPassword = async (email, newPassword) => {
     try {
-      // Find the most recent non-expired, non-consumed token for this email
       const resetToken = await db.ResetPasswordToken.findOne({
         where: {
           expired: false,
@@ -123,20 +128,35 @@ class ResetPasswordService {
       // Hash the new password
       let hashedPassword = await AuthService.hashUserPassword(newPassword);
 
-      // Update the password in the database
-      let [updated] = await db.User.update(
-        { password: hashedPassword },
-        { where: { email: email.trim(), typeLogin: "local" } }
-      );
+      await db.sequelize.transaction(async (t) => {
+        // Update the password
+        const [updated] = await db.User.update(
+          { password: hashedPassword },
+          {
+            where: { email: email.trim(), typeLogin: "local" },
+            transaction: t,
+          }
+        );
 
-      if (updated === 0) {
-        throw new ErrorResponse({
-          EM: "Failed to update password. Please try again.",
-        });
-      }
+        if (updated === 0) {
+          throw new ErrorResponse({
+            EM: "Failed to update password. Please try again.",
+          });
+        }
 
-      // Mark the token as consumed
-      await this.markTokenAsConsumed(resetToken.id);
+        // Mark the token as consumed and clear the verifyToken
+        await db.ResetPasswordToken.update(
+          {
+            consumed: true,
+            verifyToken: null,
+            expirationDate: new Date(),
+          },
+          {
+            where: { id: resetToken.id },
+            transaction: t,
+          }
+        );
+      });
 
       return {
         EM: "Password updated successfully.",

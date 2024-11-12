@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       verifyToken: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       consumed: {
         type: DataTypes.BOOLEAN,
