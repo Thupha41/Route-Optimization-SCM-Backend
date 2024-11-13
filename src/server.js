@@ -1,5 +1,7 @@
 require("dotenv").config();
 import express from "express";
+import { Server } from "socket.io";
+import http from "http";
 import configViewEngine from "./configs/viewEngine";
 import webRoutes from "./routes/web";
 import initApiRoute from "./routes/api";
@@ -10,6 +12,27 @@ import configSession from "./configs/config.session";
 import flash from "connect-flash";
 import configLoginWithGoogle from "./controller/googleController";
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+// Socket.IO connection handling
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  socket.on("joinRoom", (role) => {
+    socket.join(role);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
+});
+
 const port = process.env.PORT || 8888;
 const hostname = process.env.HOST_NAME;
 
@@ -37,6 +60,8 @@ initApiRoute(app);
 
 configPassport();
 configLoginWithGoogle();
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Example app listening on port ${port}`);
+server.listen(port, "0.0.0.0", () => {
+  console.log(`Server running on port ${port}`);
 });
+
+export { io };
