@@ -4,6 +4,7 @@ import { Op } from "sequelize";
 import { getInfoData, removeNull, formatKeys } from "../utils";
 import moment from "moment";
 import { generateUUID } from "../helpers";
+import { io } from "../server";
 class ProcurementPlanService {
   static getProcurementPlan = async () => {
     try {
@@ -366,15 +367,56 @@ class ProcurementPlanService {
         const updatePromises = plans.map(async (plan) => {
           const { id, ...updateData } = plan;
 
-          // Check plan exist
-          const existingPlan = await db.ProcurementPlan.findByPk(id);
+          const existingPlan = await db.ProcurementPlan.findOne({
+            where: { id },
+            include: [
+              {
+                association: "planner",
+                attributes: ["username"],
+                required: false,
+              },
+            ],
+            raw: true,
+            nest: true,
+          });
+
           if (!existingPlan) {
             throw new NotFoundResponse({
               EM: `Procurement plan with ID ${id} not found`,
             });
           }
 
-          // Update the plan
+          // Notify manager about high priority plans
+          if (updateData.priority === 1 && updateData.status === "pending") {
+            io.to("manager").emit("highPriorityPlan", {
+              message: "New high priority plan requires attention!",
+              plan: {
+                id: existingPlan.id,
+                destination: existingPlan.destination,
+                deadline: existingPlan.deadline,
+                demand: existingPlan.demand,
+                planner: existingPlan.planner?.username || "Unknown",
+                priority: updateData.priority,
+              },
+            });
+          }
+
+          // Notify planner about plan status changes
+          if (
+            updateData.status === "approved" ||
+            updateData.status === "rejected"
+          ) {
+            io.to("planner").emit("planStatusChanged", {
+              message: `Your plan has been ${updateData.status}`,
+              plan: {
+                id: existingPlan.id,
+                status: updateData.status,
+                destination: existingPlan.destination,
+                priority: existingPlan.priority,
+              },
+            });
+          }
+
           return db.ProcurementPlan.update(updateData, {
             where: { id },
             transaction: t,
@@ -388,9 +430,7 @@ class ProcurementPlanService {
       return {
         EM: `Successfully updated ${result} procurement plan(s)`,
         EC: 1,
-        DT: {
-          updatedCount: result,
-        },
+        DT: { updatedCount: result },
       };
     } catch (error) {
       console.log(error);

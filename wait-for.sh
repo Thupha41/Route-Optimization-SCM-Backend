@@ -1,17 +1,32 @@
 #!/bin/sh
 
-# wait-for.sh
-# Wait until the given host and port are ready.
+# Strict error handling
+set -e
 
-host="$1"
-shift
-port="$1"
-shift
+# Check if we have enough arguments
+if [ "$#" -lt 2 ]; then
+    echo "Usage: $0 host port [-- command args]"
+    exit 1
+fi
 
-until nc -z "$host" "$port"; do
-  >&2 echo "Waiting for $host:$port..."
-  sleep 1
+# Store host and port
+HOST="$1"
+PORT="$2"
+
+# Remove the first two arguments
+shift 2
+
+echo "Testing connection to $HOST:$PORT"
+
+# Wait for the host and port to be available
+until nc -z "$HOST" "$PORT"; do
+    echo "Waiting for $HOST:$PORT..."
+    sleep 1
 done
 
->&2 echo "$host:$port is up"
-exec "$@"
+echo "$HOST:$PORT is available"
+
+# If there are remaining arguments, execute them
+if [ $# -gt 0 ]; then
+    exec "$@"
+fi
