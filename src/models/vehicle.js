@@ -18,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Vehicle.init({
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
     vehicle_name: DataTypes.STRING,
     registered_num: DataTypes.STRING,
     capacity: DataTypes.INTEGER,
