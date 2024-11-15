@@ -47,6 +47,27 @@ const createUser = async (req, res) => {
     }).send(res);
   }
 };
+
+const searchUser = async (req, res) => {
+  try {
+    const searchQuery = req.query.searchQuery || "";
+    const result = await UserService.search(searchQuery);
+    return new OK({
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT,
+    }).send(res);
+  } catch (error) {
+    console.log(error);
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
+  }
+};
+
 const deleteUser = async (req, res) => {
   try {
     let data = await UserService.delete(req.params.id);
@@ -105,10 +126,71 @@ const getUserAccount = (req, res) => {
     },
   }).send(res);
 };
+
+const bulkDeleteUsers = async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    const result = await UserService.bulkDelete(ids);
+
+    return new OK({
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT,
+    }).send(res);
+  } catch (error) {
+    console.log(error);
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
+  }
+};
+
+const bulkUpdateUsers = async (req, res) => {
+  try {
+    const { users } = req.body;
+
+    // Validate input
+    if (!Array.isArray(users) || users.length === 0) {
+      return new ErrorResponse({
+        EM: "Please provide an array of users to update",
+      }).send(res);
+    }
+
+    if (!users.every((user) => user.id)) {
+      return new ErrorResponse({
+        EM: "Each user must have an id",
+      }).send(res);
+    }
+
+    const result = await UserService.bulkUpdate(users);
+
+    return new OK({
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT,
+    }).send(res);
+  } catch (error) {
+    console.log(error);
+    if (error instanceof ErrorResponse) {
+      return error.send(res);
+    }
+    return new ErrorResponse({
+      EM: "Something went wrong with server",
+    }).send(res);
+  }
+};
+
 module.exports = {
   getListUser,
   createUser,
   deleteUser,
   updateUser,
   getUserAccount,
+  searchUser,
+  bulkDeleteUsers,
+  bulkUpdateUsers,
 };
