@@ -12,6 +12,7 @@ exports.auditLogMiddleware = (req, res, next) => {
     const originalJson = res.json;
     res.json = async function (body){
       await db.AuditLog.create({
+        user_id: req.user.user_id,
         url: req.originalUrl,
         activity: methodMappers[req.method] + ' ' + req.originalUrl.split("/")[req.originalUrl.split("/").length - 1] || "",
         params: JSON.stringify(req.params),

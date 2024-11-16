@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     capacity: DataTypes.INTEGER,
     kilometer_driven: DataTypes.DOUBLE,
     parking_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: true,
     },
   }, {
