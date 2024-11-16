@@ -26,7 +26,6 @@ const initApiRoute = (app) => {
   // router.post("/verify-services-jwt", checkServicesJWT);
 
   //auth route
-  router.get("/account", UserController.getUserAccount);
   router.post("/register", AuthController.handleRegister);
   router.post("/login", AuthController.handleLogin);
   router.post("/logout", AuthController.handleLogout);
@@ -38,6 +37,10 @@ const initApiRoute = (app) => {
   router.post("/users/create", UserController.createUser);
   router.put("/users/update/:id", UserController.updateUser);
   router.delete("/users/delete/:id", UserController.deleteUser);
+  router.get("/users/search", UserController.searchUser);
+  router.get("/account", UserController.getUserAccount);
+  router.delete("/users/bulk-delete", UserController.bulkDeleteUsers);
+  router.put("/users/bulk-update", UserController.bulkUpdateUsers);
 
   //procurement plan route
   router.get(
@@ -51,7 +54,7 @@ const initApiRoute = (app) => {
   );
   router.post(
     "/procurement-plan/create",
-    auditLogMiddleware,
+    // auditLogMiddleware,
     ProcurementPlanController.createProcurementPlan
   );
   router.post(
@@ -70,12 +73,12 @@ const initApiRoute = (app) => {
   );
   router.delete(
     "/procurement-plan/bulk-delete",
-    auditLogMiddleware,
+    // auditLogMiddleware,
     ProcurementPlanController.bulkDeleteProcurementPlans
   );
   router.put(
     "/procurement-plan/bulk-update",
-    auditLogMiddleware,
+    // auditLogMiddleware,
     ProcurementPlanController.bulkUpdateProcurementPlans
   );
 

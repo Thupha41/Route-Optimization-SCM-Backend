@@ -60,7 +60,7 @@ initApiRoute(app);
 
 configPassport();
 configLoginWithGoogle();
-server.listen(port, "0.0.0.0", () => {
+server.listen(port, hostname, () => {
   console.log(`Server running on port ${port}`);
 });
 

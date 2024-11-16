@@ -29,14 +29,14 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       plannerId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(36),
         references: {
           model: "User",
           key: "id",
         },
       },
       managerId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(36),
         references: {
           model: "User",
           key: "id",

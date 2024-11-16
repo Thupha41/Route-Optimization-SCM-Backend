@@ -10,6 +10,7 @@ const nonSecurePaths = [
   "/verify-services-jwt",
   "/procurement-plan/search",
   "/procurement-plan/filter",
+  "/users/search",
 ];
 const createToken = (payload) => {
   let token = null;
