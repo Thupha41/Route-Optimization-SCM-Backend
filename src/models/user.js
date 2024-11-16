@@ -19,12 +19,16 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "managerId",
         as: "manager_of_plan",
       });
+      User.hasMany(models.AuditLog, {
+        foreignKey: "user_id",
+        as: "audit_logs",
+      });
     }
   }
   User.init(
     {
       id: {
-        type: DataTypes.STRING(36),
+        type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
         allowNull: false,

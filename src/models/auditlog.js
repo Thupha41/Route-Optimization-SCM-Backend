@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class AuditLog extends Model {
     /**
@@ -16,44 +14,53 @@ module.exports = (sequelize, DataTypes) => {
         as: "user",
       });
     }
-  };
-  AuditLog.init({
-    user_id: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "User",
-        key: "id",
+  }
+  AuditLog.init(
+    {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
+      user_id: {
+        type: DataTypes.UUID,
+        references: {
+          model: "User",
+          key: "id",
+        },
+      },
+      url: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      activity: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      params: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      query: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      payload: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      response: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
     },
-    url: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    activity: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    params: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    query: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    payload: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    response: {
-      type: DataTypes.STRING,
-      allowNull: true
+    {
+      sequelize,
+      modelName: "AuditLog",
+      freezeTableName: true,
+      tableName: "AuditLog",
     }
-  }, {
-    sequelize,
-    modelName: 'AuditLog',
-    freezeTableName: true,
-    tableName: "AuditLog",
-  });
+  );
   return AuditLog;
 };

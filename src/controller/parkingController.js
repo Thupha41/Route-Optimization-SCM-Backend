@@ -31,7 +31,7 @@ const getListParking = async (req, res) => {
     }).send(res);
   }
 };
-const createNewParking = async (req, res) => {
+const createParking = async (req, res) => {
   try {
     const result = await ParkingService.create(req.body);
     return new CREATED({
@@ -50,7 +50,7 @@ const createNewParking = async (req, res) => {
     }).send(res);
   }
 };
-const deleteParkingArea = async (req, res) => {
+const deleteParking = async (req, res) => {
   try {
     let data = await ParkingService.delete(req.params.id);
     return new OK({
@@ -69,7 +69,7 @@ const deleteParkingArea = async (req, res) => {
     }).send(res);
   }
 };
-const updateParkingArea = async (req, res) => {
+const updateParking = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -98,7 +98,7 @@ const updateParkingArea = async (req, res) => {
 
 module.exports = {
   getListParking,
-  createNewParking,
-  deleteParkingArea,
-  updateParkingArea,
+  createParking,
+  deleteParking,
+  updateParking,
 };
