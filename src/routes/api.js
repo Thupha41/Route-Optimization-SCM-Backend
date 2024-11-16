@@ -1,4 +1,5 @@
 import express from "express";
+import AuditLogController from "../controller/auditLogController"
 import AuthController from "../controller/authController";
 import UserController from "../controller/userController";
 import ProcurementPlanController from "../controller/procurementPlanController";
@@ -24,6 +25,12 @@ const initApiRoute = (app) => {
 
   //service route
   // router.post("/verify-services-jwt", checkServicesJWT);
+
+  //auditlog route
+  router.get("/audit-log/read", AuditLogController.getListAuditLog);
+  router.post("/audit-log/create", AuditLogController.createAuditLog);
+  router.put("/audit-log/update/:id", AuditLogController.deleteAuditLog);
+  router.delete("/audit-log/delete/:id", AuditLogController.updateAuditLog);
 
   //auth route
   router.post("/register", AuthController.handleRegister);
