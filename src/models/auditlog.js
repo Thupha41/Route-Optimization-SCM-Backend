@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       activity: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(1000),
         allowNull: true,
       },
       params: {
@@ -43,11 +43,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       query: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(1000),
         allowNull: true,
       },
       payload: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(1000),
         allowNull: true,
       },
       response: {
