@@ -12,7 +12,7 @@ import loginController from "../controller/loginController";
 import passport from "passport";
 import checkUser from "../middleware/checkUser";
 import { handleLogout } from "../controller/passportController";
-
+import { auditLogMiddleware } from "../middleware/auditLogging";
 const router = express.Router();
 
 router.get("/", checkUser.isLogin, getHomePage);
@@ -32,7 +32,7 @@ router.get("/login", checkUser.isLogin, loginController.getLoginPage);
 //   })
 // );
 
-router.post("/login", function (req, res, next) {
+router.post("/login", auditLogMiddleware, function (req, res, next) {
   passport.authenticate("local", function (error, user, info) {
     if (error) {
       return res.status(500).json(error);
@@ -50,7 +50,7 @@ router.post("/login", function (req, res, next) {
   })(req, res, next);
 });
 
-router.post("/logout", handleLogout);
+router.post("/logout", auditLogMiddleware, handleLogout);
 
 router.post("/verify-token", loginController.verifySSOToken);
 

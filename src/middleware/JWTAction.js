@@ -4,9 +4,9 @@ import { v4 as uuidv4 } from "uuid";
 import AuthService from "../services/auth.service";
 let key = process.env.JWT_SECRET;
 const nonSecurePaths = [
-  "/logout",
-  "/register",
-  "/login",
+  "/auth/logout",
+  "/auth/register",
+  "/auth/login",
   "/verify-services-jwt",
   "/procurement-plan/search",
   "/procurement-plan/filter",
@@ -106,7 +106,7 @@ const extractToken = (req) => {
   return null;
 };
 const checkUserPermission = (req, res, next) => {
-  if (nonSecurePaths.includes(req.path) || req.path === "/account") {
+  if (nonSecurePaths.includes(req.path) || req.path === "/users/account") {
     return next();
   }
 

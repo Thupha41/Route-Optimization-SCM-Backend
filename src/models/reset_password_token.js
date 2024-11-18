@@ -16,8 +16,14 @@ module.exports = (sequelize, DataTypes) => {
 
   ResetPasswordToken.init(
     {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
       userID: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
       },
       verifyToken: {

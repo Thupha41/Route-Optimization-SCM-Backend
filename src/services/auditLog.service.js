@@ -6,8 +6,15 @@ class AuditLogService {
     try {
       let auditLog = await db.AuditLog.findAll({
         // attributes: ["id", "name", "address"],
+        include: [
+          {
+            association: "user",
+            attributes: ["username"],
+          },
+        ],
         order: [["id", "DESC"]],
         raw: true,
+        nest: true,
       });
 
       if (auditLog && auditLog.length > 0) {
@@ -97,11 +104,9 @@ class AuditLogService {
       });
 
       if (auditLog) {
-        await db.AuditLog.update(data,
-          {
-            where: { id: data.id },
-          }
-        );
+        await db.AuditLog.update(data, {
+          where: { id: data.id },
+        });
 
         return {
           EM: "Update auditLog successfully",
@@ -113,7 +118,6 @@ class AuditLogService {
           EM: "AuditLog not found",
         });
       }
-
     } catch (error) {
       console.log(error);
       return {
@@ -130,7 +134,7 @@ class AuditLogService {
           id: id,
         },
       });
-      
+
       if (result === 1) {
         return {
           EM: "AuditLog deleted successfully",
